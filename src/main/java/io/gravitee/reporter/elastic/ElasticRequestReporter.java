@@ -15,94 +15,57 @@
  */
 package io.gravitee.reporter.elastic;
 
-import io.gravitee.gateway.api.Request;
-import io.gravitee.gateway.api.RequestReporter;
-import io.gravitee.gateway.api.Response;
-import io.gravitee.reporter.elastic.config.Configuration;
-import io.gravitee.reporter.elastic.config.loader.PropertieConfigLoader;
-import io.gravitee.reporter.elastic.model.TransportAddress;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
-import java.util.List;
-
-import org.elasticsearch.action.bulk.BulkRequestBuilder;
-import org.elasticsearch.action.bulk.BulkResponse;
-import org.elasticsearch.action.index.IndexRequestBuilder;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.action.bulk.BulkProcessor;
+import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import io.gravitee.gateway.api.Request;
+import io.gravitee.gateway.api.Response;
+import io.gravitee.gateway.api.reporters.RequestResporter;
 
 /**
  * 
  * @author Loic DASSONVILLE (loic.dassonville at gmail.com)
  * 
  */
-public class ElasticRequestReporter implements RequestReporter {
+public class ElasticRequestReporter implements RequestResporter {
 	
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
     
-    private Configuration config;
+    @Autowired
+    private BulkProcessor bulkProcessor;
     
-    private Client client;
+    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd");
     
-	public ElasticRequestReporter() throws Exception{
-		this(System.getProperty("reporter.conf.elastic", "/etc/gravitee.io/conf/elastic.properties"));
-	}
-	
-	public ElasticRequestReporter(final String configurationPath) throws Exception{
-		this.config = new PropertieConfigLoader().load(configurationPath);
-		this.client = getClient();
-	}
-	
-	
-	
-
 	@Override
 	public void report(Request request, Response response) {
 		
-		try{
-			LOGGER.debug("start report");
+		Date date = new Date();
+				
+		try {
+			bulkProcessor.add(new IndexRequest("gravitee-"+sdf.format(date), "request").source(
+				XContentFactory.jsonBuilder()
+					.startObject()
+						.field("id", request.id())
+					    .field("uri", request.uri())
+					    .field("path", request.path())
+					    .field("status", response.status())
+					    .field("method", request.method().toString())
+					    .field("hostname", InetAddress.getLocalHost().getHostName())
+					        //.field("@timestamp",new Date())
+					.endObject()));
 			
-			BulkRequestBuilder bulkRequest = client.prepareBulk();
-	
-			IndexRequestBuilder indexRequestBuilder = this.client.prepareIndex("gravitee", "request");
-			bulkRequest.add(indexRequestBuilder.setSource(
-					XContentFactory.jsonBuilder()
-					    .startObject()
-					        .field("uri", request.uri())
-					        .field("status", response.status())
-					        .field("methode", request.method().toString())
-					    .endObject()));
-				    
-			BulkResponse bulkResponse = bulkRequest.execute().actionGet();
-			
-			if (bulkResponse.hasFailures()) {
-				LOGGER.error("ES Request report request failure");
-			}
-			
-			LOGGER.debug("end report");
-			
-			// TODO : https://www.elastic.co/guide/en/elasticsearch/client/java-api/current/bulk.html
-			
-		}catch(Exception e){
-			LOGGER.error("ES Request report insertion failure", e);
+		} catch (IOException e) {
+			LOGGER.error("Request {} report failed", request.id() ,e);
 		}
-		
 	}
-	
-	
-	public TransportClient getClient(){
 
-		TransportClient client = new TransportClient();
-		
-		List<TransportAddress> adresses = config.getTransportAddresses();
-		
-		for (TransportAddress address : adresses) {
-			client.addTransportAddress(new InetSocketTransportAddress(address.getHostname(), address.getPort()));
-		}
-		return client;
-		
-	}
 }
