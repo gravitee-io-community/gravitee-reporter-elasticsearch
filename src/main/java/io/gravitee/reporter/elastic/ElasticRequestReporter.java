@@ -29,14 +29,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import io.gravitee.gateway.api.Request;
 import io.gravitee.gateway.api.Response;
-import io.gravitee.gateway.api.reporters.RequestResporter;
-
+import io.gravitee.gateway.api.reporter.Reporter;
 /**
  * 
  * @author Loic DASSONVILLE (loic.dassonville at gmail.com)
  * 
  */
-public class ElasticRequestReporter implements RequestResporter {
+public class ElasticRequestReporter implements Reporter {
 	
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
     
