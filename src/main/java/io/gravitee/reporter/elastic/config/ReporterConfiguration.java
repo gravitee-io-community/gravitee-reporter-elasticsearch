@@ -30,11 +30,6 @@ import io.gravitee.reporter.elastic.factories.ElasticClientFactory;
 
 @Configuration
 public class ReporterConfiguration {
-  
-	@Bean
-	public Reporter requestReporter(){
-		return new ElasticRequestReporter();
-	}
 	
 	@Bean
     public ElasticClientFactory elasticClientFactory() {

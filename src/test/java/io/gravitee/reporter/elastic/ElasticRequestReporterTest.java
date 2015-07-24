@@ -44,7 +44,7 @@ public class ElasticRequestReporterTest {
 
 	public ElasticRequestReporter reporter;
 
-	@Before
+	//@Before
 	public void init() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ReporterConfiguration.class);
@@ -57,8 +57,8 @@ public class ElasticRequestReporterTest {
 		//TODO correct reporter test
 	}
 
-	@Test
-	@Ignore
+	//@Test
+	//@Ignore
 	public void singleReportTest() {
 
 		try {

@@ -47,7 +47,7 @@ public class Configuration {
 	 * Cluster name. Used only for node protocol
 	 */
 	@Value("${elastic.cluster.name:gravitee}")
-	private String clusterName;
+	private String clusterName ;
 	
 	@Value("${elastic.bulk.actions:1000}")
 	private Integer bulkActions;
@@ -59,7 +59,7 @@ public class Configuration {
 	private Long flushInterval;
 	
 	@Value("${elastic.bulk.concurrent.request:5}")		
-	private Integer concurrentRequests;
+	private Integer concurrentRequests ;
 
 	@Value("${elastic.hosts:localhost}")		
 	private String hosts;
