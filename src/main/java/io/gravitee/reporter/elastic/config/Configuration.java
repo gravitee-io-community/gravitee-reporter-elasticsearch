@@ -47,7 +47,20 @@ public class Configuration {
 	 * Cluster name. Used only for node protocol
 	 */
 	@Value("${elastic.cluster.name:gravitee}")
-	private String clusterName ;
+	private String clusterName;
+	
+	/**
+	 * Prefix index name. 
+	 */
+	@Value("${elastic.index.name:gravitee}")
+	private String indexName;
+	
+	/**
+	 * Prefix index name. 
+	 */
+	@Value("${elastic.type.name:request}")
+	private String typeName;	
+	
 	
 	@Value("${elastic.bulk.actions:1000}")
 	private Integer bulkActions;
@@ -74,7 +87,6 @@ public class Configuration {
 		return protocol;
 	}
 
-
 	public String getClusterName() {
 		return clusterName;
 	}
@@ -90,21 +102,26 @@ public class Configuration {
 		return bulkActions;
 	}
 
-
 	public Long getBulkSize() {
 		return bulkSize;
 	}
-
 
 	public Long getFlushInterval() {
 		return flushInterval;
 	}
 
-
 	public Integer getConcurrentRequests() {
 		return concurrentRequests;
 	}
 
+	public String getIndexName() {
+		return indexName;
+	}
+
+
+	public String getTypeName() {
+		return typeName;
+	}
 
 	/**
 	 * Unmarshall hostes under the format "hostname1:port1, hostname2"

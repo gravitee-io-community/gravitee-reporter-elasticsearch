@@ -36,6 +36,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import io.gravitee.gateway.api.Request;
 import io.gravitee.gateway.api.Response;
 import io.gravitee.gateway.api.reporter.Reporter;
+import io.gravitee.reporter.elastic.config.Configuration;
 import io.gravitee.reporter.elastic.config.ReporterConfiguration;
 /**
  * 
@@ -50,8 +51,12 @@ public class ElasticRequestReporter implements Reporter, ApplicationContextAware
     
     private BulkProcessor bulkProcessor;
     
+    private Configuration configuration;
+  
+    /** Index simple date format **/
     private SimpleDateFormat sdf;
     
+    /** Document simple date format **/
     private  DateTimeFormatter dtf;
     
     public ElasticRequestReporter(){
@@ -66,7 +71,16 @@ public class ElasticRequestReporter implements Reporter, ApplicationContextAware
 		Date date = new Date();
 				
 		try {
-			bulkProcessor.add(new IndexRequest("gravitee-"+sdf.format(date), "request").source(
+			
+			String reqContentType = request.headers().get("Content-Type");
+			String respContentType = response.headers().get("Content-Type");
+			
+			String reqContentLength = request.headers().get("Content-Length");
+			String respContentLength = response.headers().get("Content-Length");
+			
+			String indexName =  String.format("%s-%s",configuration.getIndexName(), sdf.format(date));
+			
+			bulkProcessor.add(new IndexRequest(indexName, configuration.getTypeName()).source(
 				XContentFactory.jsonBuilder()
 					.startObject()
 						.field("id", request.id())
@@ -74,9 +88,12 @@ public class ElasticRequestReporter implements Reporter, ApplicationContextAware
 					    .field("path", request.path())
 					    .field("status", response.status())
 					    .field("method", request.method().toString())
+					    .field("request-content-type", reqContentType)
+					    .field("response-content-type", respContentType)		    
+					    .field("request-content-length", reqContentLength)
+					    .field("response-content-length", respContentLength)					    
 					    .field("hostname", InetAddress.getLocalHost().getHostName())
 					    .field("@timestamp",date, dtf)
-
 					.endObject()));
 			
 		} catch (IOException e) {
@@ -101,6 +118,7 @@ public class ElasticRequestReporter implements Reporter, ApplicationContextAware
     private void init(ApplicationContext context){
     	this.registerReporterContext(context);
 		this.bulkProcessor = this.reporterContext.getBean(BulkProcessor.class);
+		this.configuration = this.reporterContext.getBean(Configuration.class);
     }
 
 }
