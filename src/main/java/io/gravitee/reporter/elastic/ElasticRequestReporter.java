@@ -15,12 +15,10 @@
  */
 package io.gravitee.reporter.elastic;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
-
+import io.gravitee.gateway.api.Request;
+import io.gravitee.gateway.api.Response;
+import io.gravitee.gateway.api.reporter.Reporter;
+import io.gravitee.reporter.elastic.config.Configuration;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.common.joda.time.format.DateTimeFormat;
@@ -28,29 +26,26 @@ import org.elasticsearch.common.joda.time.format.DateTimeFormatter;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import io.gravitee.gateway.api.Request;
-import io.gravitee.gateway.api.Response;
-import io.gravitee.gateway.api.reporter.Reporter;
-import io.gravitee.reporter.elastic.config.Configuration;
-import io.gravitee.reporter.elastic.config.ReporterConfiguration;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 /**
  * 
  * @author Loic DASSONVILLE (loic.dassonville at gmail.com)
  * 
  */
-public class ElasticRequestReporter implements Reporter, ApplicationContextAware{
+public class ElasticRequestReporter implements Reporter {
 	
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
-    private ApplicationContext reporterContext;
-    
+	@Autowired
     private BulkProcessor bulkProcessor;
-    
+
+	@Autowired
     private Configuration configuration;
   
     /** Index simple date format **/
@@ -100,25 +95,4 @@ public class ElasticRequestReporter implements Reporter, ApplicationContextAware
 			LOGGER.error("Request {} report failed", request.id() ,e);
 		}
 	}
-
-	@Override
-	public void setApplicationContext(ApplicationContext context) throws BeansException {
-		this.init(context);
-	}
-	
-    private void registerReporterContext(ApplicationContext parentContext) {
-        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-        context.setParent(parentContext);
-        context.register(ReporterConfiguration.class);
-        context.refresh();
-        
-        this.reporterContext = context;
-    }
-    
-    private void init(ApplicationContext context){
-    	this.registerReporterContext(context);
-		this.bulkProcessor = this.reporterContext.getBean(BulkProcessor.class);
-		this.configuration = this.reporterContext.getBean(Configuration.class);
-    }
-
 }
