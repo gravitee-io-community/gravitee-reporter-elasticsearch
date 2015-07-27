@@ -29,7 +29,6 @@ import io.gravitee.reporter.elastic.model.TransportAddress;
  * @author Loic DASSONVILLE (loic.dassonville at gmail.com)
  *
  */
-@org.springframework.context.annotation.Configuration
 public class Configuration {
 	
 	private static final String HOSTS_SEPARATOR = ",";
