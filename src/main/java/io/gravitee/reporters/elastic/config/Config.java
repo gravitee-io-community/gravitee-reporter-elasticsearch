@@ -16,12 +16,16 @@
 package io.gravitee.reporters.elastic.config;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Properties;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 
+import io.gravitee.reporters.elastic.model.HostAddress;
 import io.gravitee.reporters.elastic.model.Protocol;
-import io.gravitee.reporters.elastic.model.TransportAddress;
 
 /**
  * Elasticsearch client reporter configuration.
@@ -33,6 +37,9 @@ public class Config {
 	
 	private static final String PORT_SEPARATOR = ":";
 
+	@Autowired @Qualifier("graviteeProperties")
+	private Properties properties;
+	
 	/**
 	 *  Client communication protocol. 
 	 */
@@ -57,25 +64,37 @@ public class Config {
 	@Value("${elastic.type.name:request}")
 	private String typeName;	
 	
+	/**
+	 * Request actions max by bulk 
+	 */
 	@Value("${elastic.bulk.actions:1000}")
 	private Integer bulkActions;
 	
+	/**
+	 * Bulk size in Mo
+	 */
 	@Value("${elastic.bulk.size:5}")	
 	private Long bulkSize;
 	
-	@Value("${elastic.bulk.flush.interval:1}")		
+	/**
+	 * Bulk flush interval in seconds
+	 */
+	@Value("${elastic.bulk.flush_interval:1}")		
 	private Long flushInterval;
 	
-	@Value("${elastic.bulk.concurrent.request:5}")		
+	/**
+	 * Accepted concurrent request
+	 */
+	@Value("${elastic.bulk.concurrent_requests:5}")		
 	private Integer concurrentRequests ;
 
-	@Value("${elastic.hosts:localhost}")		
-	private String[] hosts;
 	
 	/**
 	 * Elasticsearch hosts
 	 */
-	private List<TransportAddress> transportAddresses;
+	private List<HostAddress> hostsAddresses;
+	
+	private List<String> hostsUrls;
 	
 
 	public Protocol getProtocol() {
@@ -86,12 +105,21 @@ public class Config {
 		return clusterName;
 	}
 
-	public List<TransportAddress> getTransportAddresses() {
-		if(transportAddresses == null){
-			transportAddresses = unmarshallHosts(this.hosts);
+	public List<HostAddress> getHostsAddresses() {
+		if(hostsAddresses == null){
+			hostsAddresses = initializeHostsAddresses();
 		}
-		return transportAddresses;
+		return hostsAddresses;
 	}
+	
+	public List<String> getHostsUrls() {
+		if(hostsUrls == null){
+			hostsUrls = initializeHostsUrls();
+		}
+		return hostsUrls;
+	}
+	
+	
 
 	public Integer getBulkActions() {
 		return bulkActions;
@@ -118,41 +146,50 @@ public class Config {
 		return typeName;
 	}
 	
-
-	public String[] getHosts() {
-		return hosts;
-	}
-
-	/**
-	 * Unmarshall hostes under the format "hostname1:port1, hostname2"
-	 * 
-	 * @param serializedHosts
-	 * 			Serialized transport addresses
-	 * @param defaultPort
-	 * @return
-	 */
-	private List<TransportAddress> unmarshallHosts(String [] hostsParts) {
-
-		List<TransportAddress> hosts = new ArrayList<TransportAddress>();
-
-		for (String serializedHost : hostsParts) {
-
-			TransportAddress host = null;
-
+	
+	private List<HostAddress> initializeHostsAddresses(){
+		
+		String key = String.format("elastic.hosts[%s]", 0);
+		List<HostAddress> res = new ArrayList<>();
+		
+		while (properties.containsKey(key)) {
+			String serializedHost = properties.getProperty(key);
+			
 			if (serializedHost.contains(PORT_SEPARATOR)) {
 				String[] hostParts = serializedHost.split(PORT_SEPARATOR);
 				
 				String hostname = hostParts[0].toLowerCase();
 				Integer port = Integer.parseInt(hostParts[1].trim());
 				
-				host = new TransportAddress(hostname, port);
+				res.add(new HostAddress(hostname, port));
 			} else {
-				host = new TransportAddress(serializedHost.trim(), protocol.getDefaultPort());
+				res.add(new HostAddress(serializedHost.trim(), protocol.getDefaultPort()));
 			}
-			hosts.add(host);
+			
+			key = String.format("elastic.hosts[%s]", res.size());
 		}
-		return hosts;
-
+		
+		// Use default host if required
+		if(res.isEmpty()){
+			res.add(new HostAddress("localhost", protocol.getDefaultPort()));
+		}
+		return res;
 	}
 
+	public List<String> initializeHostsUrls() {
+		
+		String key = String.format("elastic.hosts[%s]", 0);
+		List<String> res = new ArrayList<>();
+		
+		while (properties.containsKey(key)) {
+			res.add(properties.getProperty(key));
+			key = String.format("elastic.hosts[%s]", res.size());
+		}
+		
+		// Use default host if required
+		if(res.isEmpty()){
+			res.add("http://localhost:9200/");
+		}
+		return res;
+	}
 }

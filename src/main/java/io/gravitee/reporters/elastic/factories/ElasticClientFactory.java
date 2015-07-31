@@ -29,7 +29,7 @@ import org.springframework.beans.factory.config.AbstractFactoryBean;
 
 import io.gravitee.reporters.elastic.config.Config;
 import io.gravitee.reporters.elastic.model.Protocol;
-import io.gravitee.reporters.elastic.model.TransportAddress;
+import io.gravitee.reporters.elastic.model.HostAddress;
 
 
 public class ElasticClientFactory extends AbstractFactoryBean<Client> {
@@ -52,9 +52,9 @@ public class ElasticClientFactory extends AbstractFactoryBean<Client> {
 			
 			TransportClient transportClient = new TransportClient(settings);
 			
-			List<TransportAddress> adresses = config.getTransportAddresses();
+			List<HostAddress> adresses = config.getHostsAddresses();
 	
-			for (TransportAddress address : adresses) {
+			for (HostAddress address : adresses) {
 				transportClient.addTransportAddress(new InetSocketTransportAddress(address.getHostname(), address.getPort()));
 			}
 			return transportClient;

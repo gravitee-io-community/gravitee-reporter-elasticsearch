@@ -20,13 +20,13 @@ package io.gravitee.reporters.elastic.model;
  * @author Loic DASSONVILLE (loic.dassonville at gmail.com)
  *
  */
-public class TransportAddress {
+public class HostAddress {
 
 	public String hostname;
 	
 	public Integer port;
 
-	public TransportAddress(String hostname, Integer port){
+	public HostAddress(String hostname, Integer port){
 		this.hostname = hostname;
 		this.port = port;
 	}

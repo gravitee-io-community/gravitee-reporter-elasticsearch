@@ -15,8 +15,6 @@
  */
 package io.gravitee.reporters.elastic.factories;
 
-import java.util.Arrays;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
 
@@ -43,7 +41,7 @@ public class HttpClientFactory extends AbstractFactoryBean<JestClient> {
 
 		if(Protocol.HTTP.equals(config.getProtocol())){
 			
-			Builder clientConfig = new HttpClientConfig.Builder(Arrays.asList(config.getHosts())).multiThreaded(true);
+			Builder clientConfig = new HttpClientConfig.Builder(config.getHostsUrls()).multiThreaded(true);
 			JestClientFactory factory = new JestClientFactory();
 			factory.setHttpClientConfig(clientConfig.build());
 			
