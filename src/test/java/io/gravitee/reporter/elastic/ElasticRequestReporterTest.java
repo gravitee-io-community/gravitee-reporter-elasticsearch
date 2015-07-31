@@ -28,7 +28,8 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import io.gravitee.common.http.HttpMethod;
 import io.gravitee.gateway.core.http.ServerRequest;
 import io.gravitee.gateway.core.http.ServerResponse;
-import io.gravitee.reporter.elastic.config.ReporterConfiguration;
+import io.gravitee.reporters.elastic.ElasticRequestReporter;
+import io.gravitee.reporters.elastic.config.ReporterConfiguration;
 
 /**
  * 

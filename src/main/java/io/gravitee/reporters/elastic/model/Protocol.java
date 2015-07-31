@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.reporter.elastic.model;
+package io.gravitee.reporters.elastic.model;
 
 /**
  * Elasticsearch client protocol.
@@ -23,7 +23,7 @@ package io.gravitee.reporter.elastic.model;
  */
 public enum Protocol {
 	
-	HTTP(9200), NODE(9300);
+	HTTP(9200), TRANSPORT(9300), NODE(null);
 	
 	private final Integer defaultPort;
 	

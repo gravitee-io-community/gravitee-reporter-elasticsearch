@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.reporter.elastic.config;
+package io.gravitee.reporters.elastic.config;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 
-import io.gravitee.reporter.elastic.model.Protocol;
-import io.gravitee.reporter.elastic.model.TransportAddress;
+import io.gravitee.reporters.elastic.model.Protocol;
+import io.gravitee.reporters.elastic.model.TransportAddress;
 
 /**
  * Elasticsearch client reporter configuration.
@@ -29,23 +29,20 @@ import io.gravitee.reporter.elastic.model.TransportAddress;
  * @author Loic DASSONVILLE (loic.dassonville at gmail.com)
  *
  */
-public class Configuration {
+public class Config {
 	
-	private static final String HOSTS_SEPARATOR = ",";
-
 	private static final String PORT_SEPARATOR = ":";
-
 
 	/**
 	 *  Client communication protocol. 
 	 */
-	@Value("${elastic.protocol:NODE}")
+	@Value("${elastic.protocol:TRANSPORT}")
 	private Protocol protocol;
 	
 	/**
 	 * Cluster name. Used only for node protocol
 	 */
-	@Value("${elastic.cluster.name:gravitee}")
+	@Value("${elastic.cluster.name:elasticsearch}")
 	private String clusterName;
 	
 	/**
@@ -60,7 +57,6 @@ public class Configuration {
 	@Value("${elastic.type.name:request}")
 	private String typeName;	
 	
-	
 	@Value("${elastic.bulk.actions:1000}")
 	private Integer bulkActions;
 	
@@ -74,7 +70,7 @@ public class Configuration {
 	private Integer concurrentRequests ;
 
 	@Value("${elastic.hosts:localhost}")		
-	private String hosts;
+	private String[] hosts;
 	
 	/**
 	 * Elasticsearch hosts
@@ -121,6 +117,11 @@ public class Configuration {
 	public String getTypeName() {
 		return typeName;
 	}
+	
+
+	public String[] getHosts() {
+		return hosts;
+	}
 
 	/**
 	 * Unmarshall hostes under the format "hostname1:port1, hostname2"
@@ -130,10 +131,9 @@ public class Configuration {
 	 * @param defaultPort
 	 * @return
 	 */
-	private List<TransportAddress> unmarshallHosts(String serializedHosts) {
+	private List<TransportAddress> unmarshallHosts(String [] hostsParts) {
 
 		List<TransportAddress> hosts = new ArrayList<TransportAddress>();
-		String[] hostsParts = serializedHosts.split(HOSTS_SEPARATOR);
 
 		for (String serializedHost : hostsParts) {
 

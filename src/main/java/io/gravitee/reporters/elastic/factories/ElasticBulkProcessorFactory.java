@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.reporter.elastic.factories;
+package io.gravitee.reporters.elastic.factories;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
 
-import io.gravitee.reporter.elastic.config.Configuration;
+import io.gravitee.reporters.elastic.config.Config;
 
 
 public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcessor> {
@@ -50,7 +50,7 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
 	private Client client;
 	
 	@Autowired
-	private Configuration config;
+	private Config config;
 
 	@Override
 	public Class<?> getObjectType() {

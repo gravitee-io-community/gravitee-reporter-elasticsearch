@@ -53,6 +53,27 @@
 			<artifactId>elasticsearch</artifactId>
 			<version>${es.version}</version>
 		</dependency>
+		
+		<!-- Used for org.elasticsearch.script.ScriptModule.configure -->
+		<dependency>
+			<groupId>org.codehaus.groovy</groupId>
+			<artifactId>groovy-all</artifactId>
+			<version>2.3.2</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-expressions</artifactId>
+			<version>4.10.2</version>
+		</dependency>
+			
+		<!-- Elasticsearch rest client dependency -->
+		<dependency>
+			<groupId>io.searchbox</groupId>
+			<artifactId>jest</artifactId>
+			<version>0.1.6</version>
+		</dependency>
+
 
 		<!-- Unit Tests -->
 		<dependency>
