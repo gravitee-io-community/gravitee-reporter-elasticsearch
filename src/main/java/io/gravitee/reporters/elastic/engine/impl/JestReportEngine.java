@@ -15,23 +15,35 @@
  */
 package io.gravitee.reporters.elastic.engine.impl;
 
+
+import java.io.IOException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import io.gravitee.gateway.api.Request;
 import io.gravitee.gateway.api.Response;
-import io.gravitee.reporters.elastic.engine.ReportEngine;
+import io.gravitee.reporters.elastic.config.Config;
+import io.searchbox.client.JestClient;
+import io.searchbox.client.JestResult;
+import io.searchbox.client.JestResultHandler;
+import io.searchbox.core.Index;
 
-public class JestReportEngine implements ReportEngine {
+public class JestReportEngine extends AbstractElasticReportEngine {
 
 	protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 	
+	@Autowired
+	protected JestClient client;
+	
+	@Autowired
+	private Config configuration;
+	
 	@Override
 	public void start() {
+		
 		LOGGER.info("Starting Elastic reporter engine...");
-		
-		//TODO implementation
-		
 		LOGGER.info("Starting Elastic reporter engine... DONE");
 		
 	}
@@ -40,17 +52,42 @@ public class JestReportEngine implements ReportEngine {
 	public void stop() {
 		
 		LOGGER.info("Stopping Elastic reporter engine...");
-		
-		//TODO implementation
-		
+		client.shutdownClient();
 		LOGGER.info("Stopping Elastic reporter engine... DONE");
 		
 	}
 
 	@Override
 	public void report(Request request, Response response) {
-		// TODO Auto-generated method stub
-		
+		try{
+			String indexName = getIndexName(request);
+			
+			String jsonObject = super.getSource(request, response).string();
+	
+			Index index = new Index.Builder(jsonObject).index(indexName).type(configuration.getTypeName()).build();
+			client.executeAsync(index, new JestResultHandler<JestResult>() {
+				public void failed(Exception ex) {
+				}
+	
+				public void completed(JestResult result) {
+				}
+			});
+			
+		} catch (IOException e) {
+			LOGGER.error("Request {} report failed", request.id() ,e);
+		}
 	}
+	
+	private void createIndex(){
+		//client.execute(new CreateIndex.Builder("articles").build());
+//		PutMapping putMapping = new PutMapping.Builder(
+//		        "my_index",
+//		        "my_type",
+//		        "{ \"document\" : { \"properties\" : { \"message\" : {\"type\" : \"string\", \"store\" : \"yes\"} } } }"
+//		).build();
+//		client.execute(putMapping);
+	}
+
+	
 
 }

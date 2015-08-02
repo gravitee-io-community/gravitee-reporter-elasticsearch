@@ -16,7 +16,6 @@
 package io.gravitee.reporters.elastic.config;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 
@@ -118,8 +117,6 @@ public class Config {
 		}
 		return hostsUrls;
 	}
-	
-	
 
 	public Integer getBulkActions() {
 		return bulkActions;
@@ -176,6 +173,7 @@ public class Config {
 		return res;
 	}
 
+	
 	public List<String> initializeHostsUrls() {
 		
 		String key = String.format("elastic.hosts[%s]", 0);

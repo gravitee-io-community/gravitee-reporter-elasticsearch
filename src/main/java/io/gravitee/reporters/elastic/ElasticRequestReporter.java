@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import io.gravitee.common.component.Lifecycle.State;
 import io.gravitee.gateway.api.Request;
 import io.gravitee.gateway.api.Response;
 import io.gravitee.gateway.api.reporter.Reporter;
@@ -32,15 +33,38 @@ import io.gravitee.reporters.elastic.engine.ReportEngine;
 public class ElasticRequestReporter implements Reporter {
 	
     protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    
+    private State lifecycleState;
 	  
 	@Autowired
 	private ReportEngine reportEngine;
 	    
     public ElasticRequestReporter(){
+    	 this.lifecycleState = State.STOPPED;
     }
     
 	@Override
 	public void report(Request request, Response response) {	
 		reportEngine.report(request, response);
+	}
+
+	@Override
+	public State lifecycleState() {
+		return this.lifecycleState;
+	}
+
+	@Override
+	public Object start() throws Exception {
+
+		reportEngine.start();
+		this.lifecycleState = State.STARTED;
+		return true;
+	}
+
+	@Override
+	public Object stop() throws Exception {
+		reportEngine.stop();
+		this.lifecycleState = State.STOPPED;
+		return true;
 	}
 }
