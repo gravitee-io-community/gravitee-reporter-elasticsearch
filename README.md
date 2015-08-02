@@ -2,7 +2,7 @@
 
 # gravitee-reporter-es
 
-Report gravitee request event in elasticsearch
+Report GraviteeIO Gateway request events to Elasticsearch Engine
 
 
 ## Build
@@ -12,7 +12,7 @@ This plugin require :
 * Maven 3
 * JDK 8
 
-One built, a plugin archive file is generated in : target/gravitee-reporter-es-1.0.0-SNAPSHOT.zip
+Once built, a plugin archive file is generated in : target/gravitee-reporter-es-1.0.0-SNAPSHOT.zip
 
 
 ## Deploy
@@ -22,7 +22,7 @@ Just unzip the plugin archive in your gravitee plugin workspace ( default is : $
 
 ## Configuration 
 
-The configuration is loaded from the common gravitee configuration file (gravitee.yml) 
+The configuration is loaded from the common GraviteeIO Gateway configuration file (gravitee.yml)
 
 
 Example : 

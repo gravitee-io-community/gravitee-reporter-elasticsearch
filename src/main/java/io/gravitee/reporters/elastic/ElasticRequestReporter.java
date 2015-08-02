@@ -15,33 +15,22 @@
  */
 package io.gravitee.reporters.elastic;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import io.gravitee.common.component.Lifecycle.State;
 import io.gravitee.gateway.api.Request;
 import io.gravitee.gateway.api.Response;
 import io.gravitee.gateway.api.reporter.Reporter;
+import io.gravitee.gateway.core.service.AbstractService;
 import io.gravitee.reporters.elastic.engine.ReportEngine;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * 
  * @author Loic DASSONVILLE (loic.dassonville at gmail.com)
  * 
  */
-public class ElasticRequestReporter implements Reporter {
-	
-    protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
-    
-    private State lifecycleState;
+public class ElasticRequestReporter extends AbstractService implements Reporter {
 	  
 	@Autowired
 	private ReportEngine reportEngine;
-	    
-    public ElasticRequestReporter(){
-    	 this.lifecycleState = State.STOPPED;
-    }
     
 	@Override
 	public void report(Request request, Response response) {	
@@ -49,22 +38,16 @@ public class ElasticRequestReporter implements Reporter {
 	}
 
 	@Override
-	public State lifecycleState() {
-		return this.lifecycleState;
-	}
-
-	@Override
-	public Object start() throws Exception {
+	protected void doStart() throws Exception {
+		super.doStart();
 
 		reportEngine.start();
-		this.lifecycleState = State.STARTED;
-		return true;
 	}
 
 	@Override
-	public Object stop() throws Exception {
+	protected void doStop() throws Exception {
+		super.doStop();
+
 		reportEngine.stop();
-		this.lifecycleState = State.STOPPED;
-		return true;
 	}
 }
