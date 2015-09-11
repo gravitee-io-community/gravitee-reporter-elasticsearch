@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.reporters.elastic.conditional;
+package io.gravitee.reporter.elastic.conditional;
 
 import org.springframework.context.annotation.ConditionContext;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 
-import io.gravitee.reporters.elastic.model.Protocol;
+import io.gravitee.reporter.elastic.model.Protocol;
 
 public class JestClientCondition extends AbstractPropertyCondition {
 	

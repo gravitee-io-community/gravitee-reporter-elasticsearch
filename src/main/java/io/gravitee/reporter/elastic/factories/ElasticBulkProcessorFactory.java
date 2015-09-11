@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.reporters.elastic.factories;
+package io.gravitee.reporter.elastic.factories;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import io.gravitee.reporter.elastic.config.Config;
 import org.elasticsearch.ExceptionsHelper;
 import org.elasticsearch.action.IndicesRequest;
 import org.elasticsearch.action.admin.indices.get.GetIndexRequestBuilder;
@@ -38,8 +39,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
-
-import io.gravitee.reporters.elastic.config.Config;
 
 
 public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcessor> {

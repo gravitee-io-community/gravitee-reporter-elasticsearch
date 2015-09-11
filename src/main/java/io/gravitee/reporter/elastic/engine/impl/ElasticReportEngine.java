@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.reporters.elastic.engine.impl;
+package io.gravitee.reporter.elastic.engine.impl;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -21,6 +21,8 @@ import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
+import io.gravitee.reporter.elastic.config.Config;
+import io.gravitee.reporter.elastic.engine.ReportEngine;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.common.joda.time.format.DateTimeFormat;
@@ -32,9 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import io.gravitee.gateway.api.Request;
 import io.gravitee.gateway.api.Response;
-import io.gravitee.reporters.elastic.config.Config;
-import io.gravitee.reporters.elastic.engine.ReportEngine;
-import io.gravitee.reporters.elastic.model.Protocol;
+import io.gravitee.reporter.elastic.model.Protocol;
 
 /**
  * Elasticsearch report engine. 
@@ -80,7 +80,7 @@ public class ElasticReportEngine implements ReportEngine {
 			
 		try {
 			
-			String indexName =  String.format("%s-%s",configuration.getIndexName(), sdf.format(request.date()));
+			String indexName =  String.format("%s-%s",configuration.getIndexName(), sdf.format(request.timestamp()));
 			
 			bulkProcessor.add(new IndexRequest(indexName, configuration.getTypeName()).source(
 				XContentFactory.jsonBuilder()
@@ -96,7 +96,7 @@ public class ElasticReportEngine implements ReportEngine {
 						.field("request-content-length", request.contentLength() >= 0 ? request.contentLength() : null)
 						.field("response-content-length", response.headers().get("Content-Length"))					    
 						.field("hostname", InetAddress.getLocalHost().getHostName())
-						.field("@timestamp",request.date(), dtf)
+						.field("@timestamp",request.timestamp(), dtf)
 					.endObject()));
 				
 		} catch (IOException e) {

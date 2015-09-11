@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.reporters.elastic.factories;
+package io.gravitee.reporter.elastic.factories;
 
 import java.util.List;
 
@@ -27,9 +27,9 @@ import org.elasticsearch.node.NodeBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
 
-import io.gravitee.reporters.elastic.config.Config;
-import io.gravitee.reporters.elastic.model.Protocol;
-import io.gravitee.reporters.elastic.model.HostAddress;
+import io.gravitee.reporter.elastic.config.Config;
+import io.gravitee.reporter.elastic.model.Protocol;
+import io.gravitee.reporter.elastic.model.HostAddress;
 
 
 public class ElasticClientFactory extends AbstractFactoryBean<Client> {

@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.reporters.elastic;
+package io.gravitee.reporter.elastic;
 
 import io.gravitee.common.service.AbstractService;
 import io.gravitee.gateway.api.Request;
 import io.gravitee.gateway.api.Response;
 import io.gravitee.gateway.api.reporter.Reporter;
-import io.gravitee.reporters.elastic.engine.ReportEngine;
+import io.gravitee.reporter.elastic.engine.ReportEngine;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**

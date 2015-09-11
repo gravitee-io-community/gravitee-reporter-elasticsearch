@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.reporters.elastic.model;
+package io.gravitee.reporter.elastic.model;
 
 /**
  * Elasticsearch client protocol.

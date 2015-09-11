@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.reporters.elastic.engine.impl;
+package io.gravitee.reporter.elastic.engine.impl;
 
 
 import java.io.IOException;
@@ -24,7 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import io.gravitee.gateway.api.Request;
 import io.gravitee.gateway.api.Response;
-import io.gravitee.reporters.elastic.config.Config;
+import io.gravitee.reporter.elastic.config.Config;
 import io.searchbox.client.JestClient;
 import io.searchbox.client.JestResult;
 import io.searchbox.client.JestResultHandler;

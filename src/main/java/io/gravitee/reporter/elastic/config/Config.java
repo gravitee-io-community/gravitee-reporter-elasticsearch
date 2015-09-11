@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.reporters.elastic.config;
+package io.gravitee.reporter.elastic.config;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import io.gravitee.reporter.elastic.model.HostAddress;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 
-import io.gravitee.reporters.elastic.model.HostAddress;
-import io.gravitee.reporters.elastic.model.Protocol;
+import io.gravitee.reporter.elastic.model.Protocol;
 
 /**
  * Elasticsearch client reporter configuration.

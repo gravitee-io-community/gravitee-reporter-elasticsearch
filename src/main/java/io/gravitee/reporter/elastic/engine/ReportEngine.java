@@ -13,38 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.reporters.elastic.model;
+package io.gravitee.reporter.elastic.engine;
+
+import io.gravitee.gateway.api.Request;
+import io.gravitee.gateway.api.Response;
 
 /**
+ * Report request execution.
  * 
- * @author Loic DASSONVILLE (loic.dassonville at gmail.com)
+ * @author ldassonville
  *
  */
-public class HostAddress {
+public interface ReportEngine {
 
-	public String hostname;
+	/**
+	 * Start reporting engine
+	 */
+	public void start();
 	
-	public Integer port;
-
-	public HostAddress(String hostname, Integer port){
-		this.hostname = hostname;
-		this.port = port;
-	}
-
-	public String getHostname() {
-		return hostname;
-	}
-
-	public void setHostname(String hostname) {
-		this.hostname = hostname;
-	}
-
-	public Integer getPort() {
-		return port;
-	}
-
-	public void setPort(Integer port) {
-		this.port = port;
-	}
+	/**
+	 * Stop reporting engine
+	 */
+	public void stop();
+	
+	/**
+	 * Report request execution
+	 * 
+	 * @param request
+	 * @param response
+	 */
+	public void report(Request request, Response response);
 	
 }

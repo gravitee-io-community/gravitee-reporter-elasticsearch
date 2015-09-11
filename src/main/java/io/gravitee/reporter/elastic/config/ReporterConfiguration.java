@@ -13,21 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.reporters.elastic.config;
+package io.gravitee.reporter.elastic.config;
 
+import io.gravitee.reporter.elastic.conditional.ElasticClientCondition;
+import io.gravitee.reporter.elastic.conditional.JestClientCondition;
+import io.gravitee.reporter.elastic.engine.ReportEngine;
+import io.gravitee.reporter.elastic.engine.impl.ElasticReportEngine;
+import io.gravitee.reporter.elastic.engine.impl.JestReportEngine;
+import io.gravitee.reporter.elastic.factories.ElasticBulkProcessorFactory;
+import io.gravitee.reporter.elastic.factories.ElasticClientFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 
-import io.gravitee.reporters.elastic.conditional.ElasticClientCondition;
-import io.gravitee.reporters.elastic.conditional.JestClientCondition;
-import io.gravitee.reporters.elastic.engine.ReportEngine;
-import io.gravitee.reporters.elastic.engine.impl.ElasticReportEngine;
-import io.gravitee.reporters.elastic.engine.impl.JestReportEngine;
-import io.gravitee.reporters.elastic.factories.ElasticBulkProcessorFactory;
-import io.gravitee.reporters.elastic.factories.ElasticClientFactory;
-import io.gravitee.reporters.elastic.factories.HttpClientFactory;
-import io.gravitee.reporters.elastic.model.Protocol;
+import io.gravitee.reporter.elastic.factories.HttpClientFactory;
+import io.gravitee.reporter.elastic.model.Protocol;
 
 @Configuration
 public class ReporterConfiguration {

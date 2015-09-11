@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.reporters.elastic.factories;
+package io.gravitee.reporter.elastic.factories;
 
+import io.gravitee.reporter.elastic.config.Config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
 
-import io.gravitee.reporters.elastic.config.Config;
-import io.gravitee.reporters.elastic.model.Protocol;
+import io.gravitee.reporter.elastic.model.Protocol;
 import io.searchbox.client.JestClient;
 import io.searchbox.client.JestClientFactory;
 import io.searchbox.client.config.HttpClientConfig;

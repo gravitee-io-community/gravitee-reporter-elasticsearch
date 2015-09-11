@@ -13,22 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.reporters.elastic.conditional;
+package io.gravitee.reporter.elastic.model;
 
-import org.springframework.context.annotation.ConditionContext;
-import org.springframework.core.type.AnnotatedTypeMetadata;
+/**
+ * 
+ * @author Loic DASSONVILLE (loic.dassonville at gmail.com)
+ *
+ */
+public class HostAddress {
 
-import io.gravitee.reporters.elastic.model.Protocol;
-
-public class ElasticClientCondition extends AbstractPropertyCondition{
+	public String hostname;
 	
-	private static final String PROTOCOL_CONFIG_KEY = "elastic.protocol";
-	
-	@Override
-	public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-		
-		Protocol protocol = Protocol.getByName(properties.getProperty(PROTOCOL_CONFIG_KEY, Protocol.TRANSPORT.name()));
-		
-		return !Protocol.HTTP.equals(protocol);
+	public Integer port;
+
+	public HostAddress(String hostname, Integer port){
+		this.hostname = hostname;
+		this.port = port;
 	}
+
+	public String getHostname() {
+		return hostname;
+	}
+
+	public void setHostname(String hostname) {
+		this.hostname = hostname;
+	}
+
+	public Integer getPort() {
+		return port;
+	}
+
+	public void setPort(Integer port) {
+		this.port = port;
+	}
+	
 }

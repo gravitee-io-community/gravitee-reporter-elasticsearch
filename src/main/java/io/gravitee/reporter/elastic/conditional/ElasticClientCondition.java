@@ -13,35 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.reporters.elastic.engine;
+package io.gravitee.reporter.elastic.conditional;
 
-import io.gravitee.gateway.api.Request;
-import io.gravitee.gateway.api.Response;
+import org.springframework.context.annotation.ConditionContext;
+import org.springframework.core.type.AnnotatedTypeMetadata;
 
-/**
- * Report request execution.
- * 
- * @author ldassonville
- *
- */
-public interface ReportEngine {
+import io.gravitee.reporter.elastic.model.Protocol;
 
-	/**
-	 * Start reporting engine
-	 */
-	public void start();
+public class ElasticClientCondition extends AbstractPropertyCondition{
 	
-	/**
-	 * Stop reporting engine
-	 */
-	public void stop();
+	private static final String PROTOCOL_CONFIG_KEY = "elastic.protocol";
 	
-	/**
-	 * Report request execution
-	 * 
-	 * @param request
-	 * @param response
-	 */
-	public void report(Request request, Response response);
-	
+	@Override
+	public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+		
+		Protocol protocol = Protocol.getByName(properties.getProperty(PROTOCOL_CONFIG_KEY, Protocol.TRANSPORT.name()));
+		
+		return !Protocol.HTTP.equals(protocol);
+	}
 }
