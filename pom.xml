@@ -38,6 +38,8 @@
 		<junit.version>4.12</junit.version>
 		<spring.version>4.1.6.RELEASE</spring.version>
 		<mockito.version>1.10.19</mockito.version>
+		<gravitee-gateway-api.version>1.0.0-SNAPSHOT</gravitee-gateway-api.version>
+		<gravitee-common.version>1.0.0-SNAPSHOT</gravitee-common.version>
 	</properties>
 
 	<dependencies>
@@ -45,7 +47,14 @@
 		<dependency>
 			<groupId>io.gravitee.gateway</groupId>
 			<artifactId>gravitee-gateway-api</artifactId>
-			<version>${project.version}</version>
+			<version>${gravitee-gateway-api.version}</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>io.gravitee.common</groupId>
+			<artifactId>gravitee-common</artifactId>
+			<version>${gravitee-common.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
