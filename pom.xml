@@ -36,13 +36,15 @@
 	<properties>
 		<es.version>1.6.0</es.version>
 		<junit.version>4.12</junit.version>
+		<spring.version>4.1.6.RELEASE</spring.version>
+		<mockito.version>1.10.19</mockito.version>
 	</properties>
 
 	<dependencies>
 		<!-- Gravitee internal dependencies -->
 		<dependency>
 			<groupId>io.gravitee.gateway</groupId>
-			<artifactId>gravitee-gateway-core</artifactId>
+			<artifactId>gravitee-gateway-api</artifactId>
 			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
@@ -74,12 +76,31 @@
 			<version>0.1.6</version>
 		</dependency>
 
+		<!-- Spring dependencies -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-beans</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
 
 		<!-- Unit Tests -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>${junit.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-all</artifactId>
+			<version>${mockito.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

@@ -15,10 +15,10 @@
  */
 package io.gravitee.reporters.elastic;
 
+import io.gravitee.common.service.AbstractService;
 import io.gravitee.gateway.api.Request;
 import io.gravitee.gateway.api.Response;
 import io.gravitee.gateway.api.reporter.Reporter;
-import io.gravitee.gateway.core.service.AbstractService;
 import io.gravitee.reporters.elastic.engine.ReportEngine;
 import org.springframework.beans.factory.annotation.Autowired;
 

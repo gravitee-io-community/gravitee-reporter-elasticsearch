@@ -15,28 +15,23 @@
  */
 package io.gravitee.reporter.elastic;
 
-import java.net.URI;
-
+import io.gravitee.common.http.HttpMethod;
+import io.gravitee.gateway.api.Request;
+import io.gravitee.gateway.api.Response;
+import io.gravitee.reporters.elastic.ElasticRequestReporter;
+import io.gravitee.reporters.elastic.config.ReporterConfiguration;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-
-import io.gravitee.common.http.HttpMethod;
-import io.gravitee.gateway.core.http.ServerRequest;
-import io.gravitee.gateway.core.http.ServerResponse;
-import io.gravitee.reporters.elastic.ElasticRequestReporter;
-import io.gravitee.reporters.elastic.config.ReporterConfiguration;
 
 /**
  * 
  * @author Loic DASSONVILLE (loic.dassonville at gmail.com)
  *
  */
-
 public class ElasticRequestReporterTest {
 
 	protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
@@ -63,13 +58,12 @@ public class ElasticRequestReporterTest {
 	public void singleReportTest() {
 
 		try {
+			Request request = Mockito.mock(Request.class);
+			Mockito.when(request.method()).thenReturn(HttpMethod.GET);
+			Mockito.when(request.path()).thenReturn("/customers/");
 
-			ServerRequest request = new ServerRequest();
-			request.setRequestURI(URI.create("/customers/"));
-			request.setMethod(HttpMethod.GET);
-
-			ServerResponse response = new ServerResponse();
-			response.setStatus(200);
+			Response response = Mockito.mock(Response.class);
+			Mockito.when(response.status()).thenReturn(200);
 
 			reporter.report(request, response);
 
