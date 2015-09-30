@@ -42,49 +42,49 @@ public class Config {
 	/**
 	 *  Client communication protocol. 
 	 */
-	@Value("${elastic.protocol:TRANSPORT}")
+	@Value("${reporter.elastic.protocol:TRANSPORT}")
 	private Protocol protocol;
 	
 	/**
 	 * Cluster name. Used only for node protocol
 	 */
-	@Value("${elastic.cluster.name:elasticsearch}")
+	@Value("${reporter.elastic.cluster.name:elasticsearch}")
 	private String clusterName;
 	
 	/**
 	 * Prefix index name. 
 	 */
-	@Value("${elastic.index.name:gravitee}")
+	@Value("${reporter.elastic.index.name:gravitee}")
 	private String indexName;
 	
 	/**
 	 * Prefix index name. 
 	 */
-	@Value("${elastic.type.name:request}")
+	@Value("${reporter.elastic.type.name:request}")
 	private String typeName;	
 	
 	/**
 	 * Request actions max by bulk 
 	 */
-	@Value("${elastic.bulk.actions:1000}")
+	@Value("${reporter.elastic.bulk.actions:1000}")
 	private Integer bulkActions;
 	
 	/**
 	 * Bulk size in Mo
 	 */
-	@Value("${elastic.bulk.size:5}")	
+	@Value("${reporter.elastic.bulk.size:5}")	
 	private Long bulkSize;
 	
 	/**
 	 * Bulk flush interval in seconds
 	 */
-	@Value("${elastic.bulk.flush_interval:1}")		
+	@Value("${reporter.elastic.bulk.flush_interval:1}")		
 	private Long flushInterval;
 	
 	/**
 	 * Accepted concurrent request
 	 */
-	@Value("${elastic.bulk.concurrent_requests:5}")		
+	@Value("${reporter.elastic.bulk.concurrent_requests:5}")		
 	private Integer concurrentRequests ;
 
 	
@@ -146,7 +146,7 @@ public class Config {
 	
 	private List<HostAddress> initializeHostsAddresses(){
 		
-		String key = String.format("elastic.hosts[%s]", 0);
+		String key = String.format("reporter.elastic.hosts[%s]", 0);
 		List<HostAddress> res = new ArrayList<>();
 		
 		while (properties.containsKey(key)) {
@@ -163,7 +163,7 @@ public class Config {
 				res.add(new HostAddress(serializedHost.trim(), protocol.getDefaultPort()));
 			}
 			
-			key = String.format("elastic.hosts[%s]", res.size());
+			key = String.format("reporter.elastic.hosts[%s]", res.size());
 		}
 		
 		// Use default host if required
@@ -176,12 +176,12 @@ public class Config {
 	
 	public List<String> initializeHostsUrls() {
 		
-		String key = String.format("elastic.hosts[%s]", 0);
+		String key = String.format("reporter.elastic.hosts[%s]", 0);
 		List<String> res = new ArrayList<>();
 		
 		while (properties.containsKey(key)) {
 			res.add(properties.getProperty(key));
-			key = String.format("elastic.hosts[%s]", res.size());
+			key = String.format("reporter.elastic.hosts[%s]", res.size());
 		}
 		
 		// Use default host if required
