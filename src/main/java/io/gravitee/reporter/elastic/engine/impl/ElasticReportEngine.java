@@ -80,8 +80,8 @@ public class ElasticReportEngine implements ReportEngine {
 	@Override
 	public void report(Request request, Response response) {
 		try {
-			String indexName =  String.format("%s-%s",configuration.getIndexName(), sdf.format(request.timestamp()));
-			
+			String indexName =  String.format("%s-%s",configuration.getIndexName(), sdf.format(Date.from(request.timestamp())));
+
 			bulkProcessor.add(new IndexRequest(indexName, configuration.getTypeName()).source(
 				XContentFactory.jsonBuilder()
 						.startObject()
