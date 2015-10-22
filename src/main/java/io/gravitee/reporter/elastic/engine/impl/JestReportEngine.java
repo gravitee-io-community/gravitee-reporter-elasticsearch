@@ -16,23 +16,21 @@
 package io.gravitee.reporter.elastic.engine.impl;
 
 
-import java.io.IOException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import io.gravitee.gateway.api.Request;
-import io.gravitee.gateway.api.Response;
+import io.gravitee.gateway.api.metrics.Metrics;
 import io.gravitee.reporter.elastic.config.Config;
 import io.searchbox.client.JestClient;
 import io.searchbox.client.JestResult;
 import io.searchbox.client.JestResultHandler;
 import io.searchbox.core.Index;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
-public class JestReportEngine extends AbstractElasticReportEngine {
+import java.io.IOException;
 
-	protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+public final class JestReportEngine extends AbstractElasticReportEngine {
+
+	private final Logger LOGGER = LoggerFactory.getLogger(JestReportEngine.class);
 	
 	@Autowired
 	protected JestClient client;
@@ -58,11 +56,11 @@ public class JestReportEngine extends AbstractElasticReportEngine {
 	}
 
 	@Override
-	public void report(Request request, Response response) {
+	public void report(Metrics metrics) {
 		try{
-			String indexName = getIndexName(request);
+			String indexName = getIndexName(metrics);
 			
-			String jsonObject = super.getSource(request, response).string();
+			String jsonObject = super.getSource(metrics).string();
 	
 			Index index = new Index.Builder(jsonObject).index(indexName).type(configuration.getTypeName()).build();
 			client.executeAsync(index, new JestResultHandler<JestResult>() {
@@ -74,11 +72,11 @@ public class JestReportEngine extends AbstractElasticReportEngine {
 			});
 			
 		} catch (IOException e) {
-			LOGGER.error("Request {} report failed", request.id() ,e);
+			LOGGER.error("Request {} report failed", metrics.getRequestId(), e);
 		}
 	}
 	
-	private void createIndex(){
+	private void createIndex() {
 		//client.execute(new CreateIndex.Builder("articles").build());
 //		PutMapping putMapping = new PutMapping.Builder(
 //		        "my_index",
@@ -87,7 +85,4 @@ public class JestReportEngine extends AbstractElasticReportEngine {
 //		).build();
 //		client.execute(putMapping);
 	}
-
-	
-
 }

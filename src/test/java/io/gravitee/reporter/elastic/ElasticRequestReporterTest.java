@@ -16,8 +16,7 @@
 package io.gravitee.reporter.elastic;
 
 import io.gravitee.common.http.HttpMethod;
-import io.gravitee.gateway.api.Request;
-import io.gravitee.gateway.api.Response;
+import io.gravitee.gateway.api.metrics.Metrics;
 import io.gravitee.reporter.elastic.config.ReporterConfiguration;
 import org.junit.Assert;
 import org.junit.Test;
@@ -57,14 +56,13 @@ public class ElasticRequestReporterTest {
 	public void singleReportTest() {
 
 		try {
-			Request request = Mockito.mock(Request.class);
-			Mockito.when(request.method()).thenReturn(HttpMethod.GET);
-			Mockito.when(request.path()).thenReturn("/customers/");
+			Metrics metrics = Mockito.mock(Metrics.class);
 
-			Response response = Mockito.mock(Response.class);
-			Mockito.when(response.status()).thenReturn(200);
+			Mockito.when(metrics.getRequestHttpMethod()).thenReturn(HttpMethod.GET);
+			Mockito.when(metrics.getRequestPath()).thenReturn("/customers/");
+			Mockito.when(metrics.getResponseHttpStatus()).thenReturn(200);
 
-			reporter.report(request, response);
+			reporter.report(metrics);
 
 			Thread.sleep(5000);
 

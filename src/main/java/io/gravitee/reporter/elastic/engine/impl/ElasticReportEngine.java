@@ -15,28 +15,17 @@
  */
 package io.gravitee.reporter.elastic.engine.impl;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.sql.Date;
-import java.text.SimpleDateFormat;
-import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
-
-import io.gravitee.common.http.GraviteeHttpHeader;
+import io.gravitee.gateway.api.metrics.Metrics;
 import io.gravitee.reporter.elastic.config.Config;
-import io.gravitee.reporter.elastic.engine.ReportEngine;
+import io.gravitee.reporter.elastic.model.Protocol;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.common.joda.time.format.DateTimeFormat;
-import org.elasticsearch.common.joda.time.format.DateTimeFormatter;
-import org.elasticsearch.common.xcontent.XContentFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import io.gravitee.gateway.api.Request;
-import io.gravitee.gateway.api.Response;
-import io.gravitee.reporter.elastic.model.Protocol;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Elasticsearch report engine. 
@@ -50,60 +39,29 @@ import io.gravitee.reporter.elastic.model.Protocol;
  * @author ldassonville
  *
  */
-public class ElasticReportEngine implements ReportEngine {
+public final class ElasticReportEngine extends AbstractElasticReportEngine {
 
-	protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+	private final Logger LOGGER = LoggerFactory.getLogger(ElasticReportEngine.class);
 
 	@Autowired
 	private BulkProcessor bulkProcessor;
 
 	@Autowired
 	private Config configuration;
-	  
-	/** Index simple date format **/
-	private SimpleDateFormat sdf;
-	    
-	/** Document simple date format **/
-	private  DateTimeFormatter dtf;
-	    
-	public ElasticReportEngine(){
-		
-		this.sdf = new SimpleDateFormat("yyyy.MM.dd");
-		this.sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-		
-		this.dtf = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ");
-	}
-	    
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void report(Request request, Response response) {
+	public void report(Metrics metrics) {
 		try {
-			String indexName =  String.format("%s-%s",configuration.getIndexName(), sdf.format(Date.from(request.timestamp())));
+			String indexName = getIndexName(metrics);
 
-			bulkProcessor.add(new IndexRequest(indexName, configuration.getTypeName()).source(
-				XContentFactory.jsonBuilder()
-						.startObject()
-						.field("id", request.id())
-						.field("uri", request.uri())
-						.field("path", request.path())
-						.field("status", response.status())
-						.field("method", request.method().toString())
-						.field("request-content-type", request.headers().contentType())
-						.field("response-content-type", response.headers().contentType())
-						.field("request-content-length", request.headers().contentLength() >= 0 ? request.headers().contentLength() : null)
-						.field("response-content-length", response.headers().contentLength() >= 0 ? response.headers().contentLength() : null)
-						.field("api-key", request.headers().getFirst(GraviteeHttpHeader.X_GRAVITEE_API_KEY))
-						.field("api-name", request.headers().getFirst(GraviteeHttpHeader.X_GRAVITEE_API_NAME))
-						.field("local-address", request.localAddress())
-						.field("remote-address", request.remoteAddress())
-						.field("hostname", InetAddress.getLocalHost().getHostName())
-						.field("@timestamp", Date.from(request.timestamp()), dtf)
-						.endObject()));
+			bulkProcessor.add(new IndexRequest(indexName, configuration.getTypeName())
+					.source(getSource(metrics)));
 				
 		} catch (IOException e) {
-			LOGGER.error("Request {} report failed", request.id() ,e);
+			LOGGER.error("Request {} report failed", metrics.getRequestId(), e);
 		}
 	}
 	
@@ -126,12 +84,13 @@ public class ElasticReportEngine implements ReportEngine {
 	public void stop() {
 		LOGGER.info("Stopping Elastic reporter engine...");
 		bulkProcessor.flush();
+
 		try {
 			bulkProcessor.awaitClose(30, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
 			LOGGER.error("Error while closing processor", e);
 		}
+
 		LOGGER.info("Stopping Elastic reporter engine... DONE");
 	}
-	
 }

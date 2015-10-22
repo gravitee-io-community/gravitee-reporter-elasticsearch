@@ -15,17 +15,13 @@
  */
 package io.gravitee.reporter.elastic.engine.impl;
 
-import io.gravitee.common.http.GraviteeHttpHeader;
-import io.gravitee.gateway.api.Request;
-import io.gravitee.gateway.api.Response;
+import io.gravitee.gateway.api.metrics.Metrics;
 import io.gravitee.reporter.elastic.config.Config;
 import io.gravitee.reporter.elastic.engine.ReportEngine;
 import org.elasticsearch.common.joda.time.format.DateTimeFormat;
 import org.elasticsearch.common.joda.time.format.DateTimeFormatter;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -34,10 +30,7 @@ import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 
-
 public abstract class AbstractElasticReportEngine implements ReportEngine {
-
-	protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
 	private Config configuration;
@@ -48,35 +41,37 @@ public abstract class AbstractElasticReportEngine implements ReportEngine {
 	/** Document simple date format **/
 	private  DateTimeFormatter dtf;
 
-	public AbstractElasticReportEngine(){
+	public AbstractElasticReportEngine() {
 		this.sdf = new SimpleDateFormat("yyyy.MM.dd");
 		this.sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 
 		this.dtf = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ");
 	}
 
-	protected XContentBuilder getSource(Request request, Response response) throws IOException{
+	protected XContentBuilder getSource(Metrics metrics) throws IOException{
 		return XContentFactory.jsonBuilder()
 				.startObject()
-				.field("id", request.id())
-				.field("uri", request.uri())
-				.field("path", request.path())
-				.field("status", response.status())
-				.field("method", request.method().toString())
-				.field("request-content-type", request.headers().contentType())
-				.field("response-content-type", response.headers().contentType())
-				.field("request-content-length", request.headers().contentLength() >= 0 ? request.headers().contentLength() : null)
-				.field("response-content-length", response.headers().contentLength() >= 0 ? response.headers().contentLength() : null)
-				.field("api-key", request.headers().getFirst(GraviteeHttpHeader.X_GRAVITEE_API_KEY))
-				.field("api-name", request.headers().getFirst(GraviteeHttpHeader.X_GRAVITEE_API_NAME))
-				.field("local-address", request.localAddress())
-				.field("remote-address", request.remoteAddress())
+				.field("id", metrics.getRequestId())
+				.field("uri", metrics.getRequestPath())
+				.field("path", metrics.getRequestPath())
+				.field("status", metrics.getResponseHttpStatus())
+				.field("method", metrics.getRequestHttpMethod().toString())
+				.field("request-content-type", metrics.getRequestContentType())
+				.field("response-time", metrics.getProxyResponseTimeMs())
+				.field("api-response-time", metrics.getApiResponseTimeMs())
+				.field("response-content-type", metrics.getResponseContentType())
+				.field("request-content-length", metrics.getRequestContentLength() >= 0 ? metrics.getRequestContentLength() : null)
+				.field("response-content-length", metrics.getResponseContentLength() >= 0 ? metrics.getResponseContentLength() : null)
+				.field("api-key", metrics.getApiKey())
+				.field("api-name", metrics.getApiName())
+				.field("local-address", metrics.getRequestLocalAddress())
+				.field("remote-address", metrics.getRequestRemoteAddress())
 				.field("hostname", InetAddress.getLocalHost().getHostName())
-				.field("@timestamp", Date.from(request.timestamp()), dtf)
+				.field("@timestamp", Date.from(metrics.getRequestTimestamp()), dtf)
 				.endObject();
 	}
 
-	protected String getIndexName(Request request){
-		return String.format("%s-%s",configuration.getIndexName(), sdf.format(request.timestamp()));
+	protected String getIndexName(Metrics metrics){
+		return String.format("%s-%s", configuration.getIndexName(), sdf.format(Date.from(metrics.getRequestTimestamp())));
 	}
 }

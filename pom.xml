@@ -35,8 +35,7 @@
 
 	<properties>
 		<!-- Gravitee's project versions -->
-		<gravitee-gateway-api.version>0.1.0</gravitee-gateway-api.version>
-		<gravitee-common.version>0.1.0</gravitee-common.version>
+		<gravitee-gateway-api.version>0.2.0-SNAPSHOT</gravitee-gateway-api.version>
 
 		<!-- External project versions -->
 		<es.version>1.6.0</es.version>
@@ -48,12 +47,6 @@
 			<groupId>io.gravitee.gateway</groupId>
 			<artifactId>gravitee-gateway-api</artifactId>
 			<version>${gravitee-gateway-api.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.gravitee.common</groupId>
-			<artifactId>gravitee-common</artifactId>
-			<version>${gravitee-common.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -89,12 +82,14 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-beans</artifactId>
 			<version>${spring.version}</version>
+			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
 			<version>${spring.version}</version>
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- Unit Tests -->
