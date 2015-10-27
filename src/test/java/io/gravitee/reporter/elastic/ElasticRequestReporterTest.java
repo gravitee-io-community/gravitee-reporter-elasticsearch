@@ -17,7 +17,7 @@ package io.gravitee.reporter.elastic;
 
 import io.gravitee.common.http.HttpMethod;
 import io.gravitee.gateway.api.metrics.Metrics;
-import io.gravitee.reporter.elastic.config.ReporterConfiguration;
+import io.gravitee.reporter.elastic.spring.ReporterConfiguration;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;

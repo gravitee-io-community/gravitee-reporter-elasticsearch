@@ -13,23 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.reporter.elastic.conditional;
+package io.gravitee.reporter.elastic.spring.conditional;
 
+import io.gravitee.reporter.elastic.model.Protocol;
+import org.springframework.context.annotation.Condition;
 import org.springframework.context.annotation.ConditionContext;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 
-import io.gravitee.reporter.elastic.model.Protocol;
+abstract class AbstractElasticClientCondition implements Condition {
 
-public class JestClientCondition extends AbstractPropertyCondition {
-	
-	private static final String PROTOCOL_CONFIG_KEY = "elastic.protocol";
-	
+	private static final String PROTOCOL_CONFIG_KEY = "reporter.elastic.protocol";
+
 	@Override
 	public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-		
-		Protocol protocol = Protocol.getByName(properties.getProperty(PROTOCOL_CONFIG_KEY, Protocol.TRANSPORT.name()));
-		
-		return Protocol.HTTP.equals(protocol);
+		String sProtocol = context.getEnvironment().getProperty(PROTOCOL_CONFIG_KEY, Protocol.TRANSPORT.name());
+		Protocol protocol = Protocol.getByName(sProtocol);
+
+		return clientProtocol().equals(protocol);
 	}
 
+	abstract Protocol clientProtocol();
 }

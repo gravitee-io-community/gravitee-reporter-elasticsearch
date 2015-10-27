@@ -15,16 +15,14 @@
  */
 package io.gravitee.reporter.elastic.config;
 
+import io.gravitee.reporter.elastic.model.HostAddress;
+import io.gravitee.reporter.elastic.model.Protocol;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
-
-import io.gravitee.reporter.elastic.model.HostAddress;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-
-import io.gravitee.reporter.elastic.model.Protocol;
 
 /**
  * Elasticsearch client reporter configuration.
@@ -32,12 +30,12 @@ import io.gravitee.reporter.elastic.model.Protocol;
  * @author Loic DASSONVILLE (loic.dassonville at gmail.com)
  *
  */
-public class Config {
+public class ElasticConfiguration {
 	
 	private static final String PORT_SEPARATOR = ":";
 
-	@Autowired @Qualifier("graviteeProperties")
-	private Properties properties;
+	@Autowired
+	private Environment environment;
 	
 	/**
 	 *  Client communication protocol. 
@@ -87,14 +85,12 @@ public class Config {
 	@Value("${reporter.elastic.bulk.concurrent_requests:5}")		
 	private Integer concurrentRequests ;
 
-	
 	/**
 	 * Elasticsearch hosts
 	 */
 	private List<HostAddress> hostsAddresses;
 	
 	private List<String> hostsUrls;
-	
 
 	public Protocol getProtocol() {
 		return protocol;
@@ -138,19 +134,16 @@ public class Config {
 		return indexName;
 	}
 
-
 	public String getTypeName() {
 		return typeName;
 	}
-	
-	
+
 	private List<HostAddress> initializeHostsAddresses(){
-		
 		String key = String.format("reporter.elastic.hosts[%s]", 0);
 		List<HostAddress> res = new ArrayList<>();
 		
-		while (properties.containsKey(key)) {
-			String serializedHost = properties.getProperty(key);
+		while (environment.containsProperty(key)) {
+			String serializedHost = environment.getProperty(key);
 			
 			if (serializedHost.contains(PORT_SEPARATOR)) {
 				String[] hostParts = serializedHost.split(PORT_SEPARATOR);
@@ -172,15 +165,13 @@ public class Config {
 		}
 		return res;
 	}
-
 	
 	public List<String> initializeHostsUrls() {
-		
 		String key = String.format("reporter.elastic.hosts[%s]", 0);
 		List<String> res = new ArrayList<>();
 		
-		while (properties.containsKey(key)) {
-			res.add(properties.getProperty(key));
+		while (environment.containsProperty(key)) {
+			res.add(environment.getProperty(key));
 			key = String.format("reporter.elastic.hosts[%s]", res.size());
 		}
 		

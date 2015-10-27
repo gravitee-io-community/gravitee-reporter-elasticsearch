@@ -13,23 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.reporter.elastic.factories;
+package io.gravitee.reporter.elastic.spring.factory;
 
-import io.gravitee.reporter.elastic.config.Config;
+import io.gravitee.reporter.elastic.config.ElasticConfiguration;
+import io.gravitee.reporter.elastic.model.Protocol;
+import io.searchbox.client.JestClient;
+import io.searchbox.client.config.HttpClientConfig;
+import io.searchbox.client.config.HttpClientConfig.Builder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
 
-import io.gravitee.reporter.elastic.model.Protocol;
-import io.searchbox.client.JestClient;
-import io.searchbox.client.JestClientFactory;
-import io.searchbox.client.config.HttpClientConfig;
-import io.searchbox.client.config.HttpClientConfig.Builder;
+public class JestClientFactory extends AbstractFactoryBean<JestClient> {
 
-
-public class HttpClientFactory extends AbstractFactoryBean<JestClient> {
+	private final Logger LOGGER = LoggerFactory.getLogger(JestClientFactory.class);
 
 	@Autowired
-	private Config config;
+	private ElasticConfiguration configuration;
 
 	@Override
 	public Class<JestClient> getObjectType() {
@@ -38,16 +39,15 @@ public class HttpClientFactory extends AbstractFactoryBean<JestClient> {
 	
 	@Override
 	protected JestClient createInstance() throws Exception {
-
-		if(Protocol.HTTP.equals(config.getProtocol())){
-			
-			Builder clientConfig = new HttpClientConfig.Builder(config.getHostsUrls()).multiThreaded(true);
-			JestClientFactory factory = new JestClientFactory();
+		if (Protocol.HTTP.equals(configuration.getProtocol())) {
+			Builder clientConfig = new HttpClientConfig.Builder(configuration.getHostsUrls()).multiThreaded(true);
+			io.searchbox.client.JestClientFactory factory = new io.searchbox.client.JestClientFactory();
 			factory.setHttpClientConfig(clientConfig.build());
 			
 			return factory.getObject();
 		}
-		
-		throw new IllegalStateException(String.format("Unupported protocol [%s] for JestClient", config.getProtocol()));
+
+		LOGGER.error("Unsupported protocol [{}] for elastic client", configuration.getProtocol());
+		throw new IllegalStateException(String.format("Unsupported protocol [%s] for Jest client", configuration.getProtocol()));
 	}
 }

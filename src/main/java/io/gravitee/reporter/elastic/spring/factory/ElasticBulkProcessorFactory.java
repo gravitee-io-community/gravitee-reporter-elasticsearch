@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.reporter.elastic.factories;
+package io.gravitee.reporter.elastic.spring.factory;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,7 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import io.gravitee.reporter.elastic.config.Config;
+import io.gravitee.reporter.elastic.config.ElasticConfiguration;
 import org.elasticsearch.ExceptionsHelper;
 import org.elasticsearch.action.IndicesRequest;
 import org.elasticsearch.action.admin.indices.get.GetIndexRequestBuilder;
@@ -40,7 +40,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
 
-
 public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcessor> {
 
 	private Logger logger = LoggerFactory.getLogger(ElasticBulkProcessorFactory.class);
@@ -49,7 +48,7 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
 	private Client client;
 	
 	@Autowired
-	private Config config;
+	private ElasticConfiguration config;
 
 	@Override
 	public Class<?> getObjectType() {
@@ -59,7 +58,7 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
 	@Override
 	protected BulkProcessor createInstance() throws Exception {
 	
-		BulkProcessor bulkProcessor = BulkProcessor.builder(
+		return BulkProcessor.builder(
 		        client,  
 		        new BulkProcessor.Listener() {
 
@@ -82,8 +81,6 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
 		        .setFlushInterval(TimeValue.timeValueSeconds(config.getFlushInterval())) 
 		        .setConcurrentRequests(config.getConcurrentRequests()) 
 		        .build();
-		
-		return bulkProcessor;
 	}
 
 	
@@ -208,7 +205,7 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
 					.setType(typeName).setSource(mapping).execute().actionGet();
 					
 		} catch (IOException e) {
-			logger.error("Error creating indexes mapping [{}]", createdIndexes );
+			logger.error("Error creating indexes mapping [{}]", createdIndexes);
 		}
 	}
 }

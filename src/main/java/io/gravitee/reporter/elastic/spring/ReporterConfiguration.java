@@ -13,51 +13,50 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.reporter.elastic.config;
+package io.gravitee.reporter.elastic.spring;
 
-import io.gravitee.reporter.elastic.conditional.ElasticClientCondition;
-import io.gravitee.reporter.elastic.conditional.JestClientCondition;
+import io.gravitee.reporter.elastic.config.ElasticConfiguration;
 import io.gravitee.reporter.elastic.engine.ReportEngine;
 import io.gravitee.reporter.elastic.engine.impl.ElasticReportEngine;
 import io.gravitee.reporter.elastic.engine.impl.JestReportEngine;
-import io.gravitee.reporter.elastic.factories.ElasticBulkProcessorFactory;
-import io.gravitee.reporter.elastic.factories.ElasticClientFactory;
+import io.gravitee.reporter.elastic.model.Protocol;
+import io.gravitee.reporter.elastic.spring.conditional.ElasticClientTransportCondition;
+import io.gravitee.reporter.elastic.spring.conditional.JestClientCondition;
+import io.gravitee.reporter.elastic.spring.factory.ElasticBulkProcessorFactory;
+import io.gravitee.reporter.elastic.spring.factory.ElasticClientFactory;
+import io.gravitee.reporter.elastic.spring.factory.JestClientFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
-
-import io.gravitee.reporter.elastic.factories.HttpClientFactory;
-import io.gravitee.reporter.elastic.model.Protocol;
 
 @Configuration
 public class ReporterConfiguration {
 
 	@Bean @Conditional(JestClientCondition.class)
-    public HttpClientFactory httpClientFactory() {
-        return new HttpClientFactory();
+    public JestClientFactory httpClientFactory() {
+        return new JestClientFactory();
     }
 	
-	@Bean @Conditional(ElasticClientCondition.class)
+	@Bean @Conditional(ElasticClientTransportCondition.class)
     public ElasticClientFactory elasticClientFactory() {
         return new ElasticClientFactory();
     }
 	
-    @Bean @Conditional(ElasticClientCondition.class)
+    @Bean @Conditional(ElasticClientTransportCondition.class)
     public ElasticBulkProcessorFactory elasticBulkProcessorFactory() {
         return new ElasticBulkProcessorFactory();
     }
 	
 	@Bean
-	public ReportEngine reportEngine(Config configuration){
+	public ReportEngine reportEngine(ElasticConfiguration configuration){
 		if(Protocol.HTTP.equals(configuration.getProtocol())){
 			return new JestReportEngine();
 		}
 		return new ElasticReportEngine();
 	}
 
-
     @Bean 
-    public Config configuration(){
-    	return new Config();
+    public ElasticConfiguration configuration(){
+    	return new ElasticConfiguration();
     }
 }

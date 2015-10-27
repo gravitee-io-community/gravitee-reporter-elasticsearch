@@ -16,7 +16,7 @@
 package io.gravitee.reporter.elastic.engine.impl;
 
 import io.gravitee.gateway.api.metrics.Metrics;
-import io.gravitee.reporter.elastic.config.Config;
+import io.gravitee.reporter.elastic.config.ElasticConfiguration;
 import io.gravitee.reporter.elastic.model.Protocol;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.index.IndexRequest;
@@ -47,7 +47,7 @@ public final class ElasticReportEngine extends AbstractElasticReportEngine {
 	private BulkProcessor bulkProcessor;
 
 	@Autowired
-	private Config configuration;
+	private ElasticConfiguration configuration;
 
 	/**
 	 * {@inheritDoc}

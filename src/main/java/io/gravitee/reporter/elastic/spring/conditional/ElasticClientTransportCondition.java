@@ -13,32 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.reporter.elastic.engine;
+package io.gravitee.reporter.elastic.spring.conditional;
 
-import io.gravitee.gateway.api.metrics.Metrics;
+import io.gravitee.reporter.elastic.model.Protocol;
 
-/**
- * Report request execution.
- * 
- * @author ldassonville
- *
- */
-public interface ReportEngine {
+public class ElasticClientTransportCondition extends AbstractElasticClientCondition {
 
-	/**
-	 * Start reporting engine
-	 */
-	void start();
-	
-	/**
-	 * Stop reporting engine
-	 */
-	void stop();
-	
-	/**
-	 * Report request execution
-	 * 
-	 * @param metrics
-	 */
-	void report(Metrics metrics);
+	@Override
+	Protocol clientProtocol() {
+		return Protocol.TRANSPORT;
+	}
 }

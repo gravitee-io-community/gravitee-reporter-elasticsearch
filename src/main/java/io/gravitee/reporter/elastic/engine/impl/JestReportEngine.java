@@ -17,7 +17,7 @@ package io.gravitee.reporter.elastic.engine.impl;
 
 
 import io.gravitee.gateway.api.metrics.Metrics;
-import io.gravitee.reporter.elastic.config.Config;
+import io.gravitee.reporter.elastic.config.ElasticConfiguration;
 import io.searchbox.client.JestClient;
 import io.searchbox.client.JestResult;
 import io.searchbox.client.JestResultHandler;
@@ -36,7 +36,7 @@ public final class JestReportEngine extends AbstractElasticReportEngine {
 	protected JestClient client;
 	
 	@Autowired
-	private Config configuration;
+	private ElasticConfiguration configuration;
 	
 	@Override
 	public void start() {
@@ -74,15 +74,5 @@ public final class JestReportEngine extends AbstractElasticReportEngine {
 		} catch (IOException e) {
 			LOGGER.error("Request {} report failed", metrics.getRequestId(), e);
 		}
-	}
-	
-	private void createIndex() {
-		//client.execute(new CreateIndex.Builder("articles").build());
-//		PutMapping putMapping = new PutMapping.Builder(
-//		        "my_index",
-//		        "my_type",
-//		        "{ \"document\" : { \"properties\" : { \"message\" : {\"type\" : \"string\", \"store\" : \"yes\"} } } }"
-//		).build();
-//		client.execute(putMapping);
 	}
 }

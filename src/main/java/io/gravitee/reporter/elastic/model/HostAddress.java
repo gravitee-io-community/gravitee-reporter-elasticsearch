@@ -24,9 +24,9 @@ public class HostAddress {
 
 	public String hostname;
 	
-	public Integer port;
+	public int port;
 
-	public HostAddress(String hostname, Integer port){
+	public HostAddress(String hostname, int port){
 		this.hostname = hostname;
 		this.port = port;
 	}
@@ -39,11 +39,11 @@ public class HostAddress {
 		this.hostname = hostname;
 	}
 
-	public Integer getPort() {
+	public int getPort() {
 		return port;
 	}
 
-	public void setPort(Integer port) {
+	public void setPort(int port) {
 		this.port = port;
 	}
 	

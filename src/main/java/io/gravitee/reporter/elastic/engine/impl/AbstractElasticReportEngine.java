@@ -16,7 +16,7 @@
 package io.gravitee.reporter.elastic.engine.impl;
 
 import io.gravitee.gateway.api.metrics.Metrics;
-import io.gravitee.reporter.elastic.config.Config;
+import io.gravitee.reporter.elastic.config.ElasticConfiguration;
 import io.gravitee.reporter.elastic.engine.ReportEngine;
 import org.elasticsearch.common.joda.time.format.DateTimeFormat;
 import org.elasticsearch.common.joda.time.format.DateTimeFormatter;
@@ -33,13 +33,13 @@ import java.util.TimeZone;
 public abstract class AbstractElasticReportEngine implements ReportEngine {
 
 	@Autowired
-	private Config configuration;
+	private ElasticConfiguration configuration;
 
 	/** Index simple date format **/
 	private SimpleDateFormat sdf;
 
 	/** Document simple date format **/
-	private  DateTimeFormatter dtf;
+	private DateTimeFormatter dtf;
 
 	public AbstractElasticReportEngine() {
 		this.sdf = new SimpleDateFormat("yyyy.MM.dd");
