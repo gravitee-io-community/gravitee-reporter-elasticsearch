@@ -191,9 +191,10 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
 						.startObject(typeName)
 							.startObject("properties")
 								.startObject("id").field("type", "string").field("index", "not_analyzed").endObject()
+								.startObject("api-name").field("type", "string").field("index", "not_analyzed").endObject()
+								.startObject("api-key").field("type", "string").field("index", "not_analyzed").endObject()
 								.startObject("hostname").field("type", "string").field("index", "not_analyzed").endObject()
 								.startObject("uri").field("type", "string").field("index", "not_analyzed").endObject()
-								.startObject("url").field("type", "string").field("index", "not_analyzed").endObject()
 								.startObject("path").field("type", "string").field("index", "not_analyzed").endObject()
 							.endObject().
 						endObject()
