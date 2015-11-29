@@ -15,7 +15,9 @@
  */
 package io.gravitee.reporter.elastic.engine.impl;
 
-import io.gravitee.gateway.api.metrics.Metrics;
+import io.gravitee.gateway.api.reporter.metrics.Metrics;
+import io.gravitee.gateway.api.reporter.monitor.HealthStatus;
+import io.gravitee.gateway.api.reporter.Reportable;
 import io.gravitee.reporter.elastic.config.ElasticConfiguration;
 import io.gravitee.reporter.elastic.engine.ReportEngine;
 import org.elasticsearch.common.joda.time.format.DateTimeFormat;
@@ -67,11 +69,22 @@ public abstract class AbstractElasticReportEngine implements ReportEngine {
 				.field("local-address", metrics.getRequestLocalAddress())
 				.field("remote-address", metrics.getRequestRemoteAddress())
 				.field("hostname", InetAddress.getLocalHost().getHostName())
-				.field("@timestamp", Date.from(metrics.getRequestTimestamp()), dtf)
+				.field("@timestamp", Date.from(metrics.timestamp()), dtf)
 				.endObject();
 	}
 
-	protected String getIndexName(Metrics metrics){
-		return String.format("%s-%s", configuration.getIndexName(), sdf.format(Date.from(metrics.getRequestTimestamp())));
+	protected XContentBuilder getSource(HealthStatus healthStatus) throws IOException{
+		return XContentFactory.jsonBuilder()
+				.startObject()
+				.field("api", healthStatus.getApi())
+				.field("status", healthStatus.getStatus())
+				.field("hostname", InetAddress.getLocalHost().getHostName())
+				.field("@timestamp", Date.from(healthStatus.timestamp()), dtf)
+				.endObject();
+	}
+
+
+	protected String getIndexName(Reportable reportable){
+		return String.format("%s-%s", configuration.getIndexName(), sdf.format(Date.from(reportable.timestamp())));
 	}
 }

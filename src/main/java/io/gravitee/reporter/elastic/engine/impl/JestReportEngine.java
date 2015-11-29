@@ -16,7 +16,9 @@
 package io.gravitee.reporter.elastic.engine.impl;
 
 
-import io.gravitee.gateway.api.metrics.Metrics;
+import io.gravitee.gateway.api.reporter.metrics.Metrics;
+import io.gravitee.gateway.api.reporter.monitor.HealthStatus;
+import io.gravitee.gateway.api.reporter.Reportable;
 import io.gravitee.reporter.elastic.config.ElasticConfiguration;
 import io.searchbox.client.JestClient;
 import io.searchbox.client.JestResult;
@@ -56,13 +58,20 @@ public final class JestReportEngine extends AbstractElasticReportEngine {
 	}
 
 	@Override
-	public void report(Metrics metrics) {
-		try{
-			String indexName = getIndexName(metrics);
-			
-			String jsonObject = super.getSource(metrics).string();
-	
-			Index index = new Index.Builder(jsonObject).index(indexName).type(configuration.getTypeName()).build();
+	public void report(Reportable reportable) {
+		try {
+			String indexName = getIndexName(reportable);
+			String jsonObject = null;
+			String typeName = null;
+			if (reportable instanceof Metrics) {
+				jsonObject = super.getSource((Metrics) reportable).string();
+				typeName = "request";
+			} else if (reportable instanceof HealthStatus) {
+				jsonObject = super.getSource((HealthStatus) reportable).string();
+				typeName = "health";
+			}
+
+			Index index = new Index.Builder(jsonObject).index(indexName).type(typeName).build();
 			client.executeAsync(index, new JestResultHandler<JestResult>() {
 				public void failed(Exception ex) {
 				}
@@ -72,7 +81,7 @@ public final class JestReportEngine extends AbstractElasticReportEngine {
 			});
 			
 		} catch (IOException e) {
-			LOGGER.error("Request {} report failed", metrics.getRequestId(), e);
+			LOGGER.error("Request {} report failed", reportable, e);
 		}
 	}
 }

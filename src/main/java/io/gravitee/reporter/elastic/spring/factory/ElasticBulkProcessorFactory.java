@@ -95,7 +95,7 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
 				indexes.addAll(Arrays.asList(actionRequest.indices()));
 			}
 			
-			createIndexesMapping(indexes, config.getTypeName());
+			createIndexesMapping(indexes);
 			
 		}catch(Exception e){
 			logger.error("Fail to initialized indexes", e);
@@ -165,9 +165,8 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
 	 * Create index mappings.
 	 * 
 	 * @param indexesNames Index to be configured
-	 * @param typeName Type used for mapping
 	 */
-	private void createIndexesMapping(Collection<String> indexesNames, String typeName) {
+	private void createIndexesMapping(Collection<String> indexesNames) {
 
 		// If nothing to do, we skip
 		if (indexesNames == null || indexesNames.isEmpty()) {
@@ -184,27 +183,59 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
 			}
 		}
 
+		createRequestMapping(createdIndexes);
+		createHealthMapping(createdIndexes);
+	}
+
+	private void createRequestMapping(List<String> createdIndexes) {
+		String typeName = "request";
+
 		// Index mapping configuration
 		try {
 			String mapping = XContentFactory.jsonBuilder()
 					.startObject()
-						.startObject(typeName)
-							.startObject("properties")
-								.startObject("id").field("type", "string").field("index", "not_analyzed").endObject()
-								.startObject("api-name").field("type", "string").field("index", "not_analyzed").endObject()
-								.startObject("api-key").field("type", "string").field("index", "not_analyzed").endObject()
-								.startObject("hostname").field("type", "string").field("index", "not_analyzed").endObject()
-								.startObject("uri").field("type", "string").field("index", "not_analyzed").endObject()
-								.startObject("path").field("type", "string").field("index", "not_analyzed").endObject()
-							.endObject().
-						endObject()
+					.startObject(typeName)
+					.startObject("properties")
+					.startObject("id").field("type", "string").field("index", "not_analyzed").endObject()
+					.startObject("api-name").field("type", "string").field("index", "not_analyzed").endObject()
+					.startObject("api-key").field("type", "string").field("index", "not_analyzed").endObject()
+					.startObject("hostname").field("type", "string").field("index", "not_analyzed").endObject()
+					.startObject("uri").field("type", "string").field("index", "not_analyzed").endObject()
+					.startObject("path").field("type", "string").field("index", "not_analyzed").endObject()
+					.endObject().
+							endObject()
 					.endObject()
-				.string();
-			
+					.string();
+
 			logger.debug("Applying default mapping for [{}]/[{}]: {}", createdIndexes, typeName, mapping);
 			client.admin().indices().preparePutMapping(createdIndexes.toArray(new String[createdIndexes.size()]))
 					.setType(typeName).setSource(mapping).execute().actionGet();
-					
+
+		} catch (IOException e) {
+			logger.error("Error creating indexes mapping [{}]", createdIndexes);
+		}
+	}
+
+	private void createHealthMapping(List<String> createdIndexes) {
+		String typeName = "health";
+
+		// Index mapping configuration
+		try {
+			String mapping = XContentFactory.jsonBuilder()
+					.startObject()
+					.startObject(typeName)
+					.startObject("properties")
+					.startObject("api").field("type", "string").field("index", "not_analyzed").endObject()
+					.startObject("hostname").field("type", "string").field("index", "not_analyzed").endObject()
+					.endObject().
+							endObject()
+					.endObject()
+					.string();
+
+			logger.debug("Applying default mapping for [{}]/[{}]: {}", createdIndexes, typeName, mapping);
+			client.admin().indices().preparePutMapping(createdIndexes.toArray(new String[createdIndexes.size()]))
+					.setType(typeName).setSource(mapping).execute().actionGet();
+
 		} catch (IOException e) {
 			logger.error("Error creating indexes mapping [{}]", createdIndexes);
 		}

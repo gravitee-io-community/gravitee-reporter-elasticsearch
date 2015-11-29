@@ -15,7 +15,9 @@
  */
 package io.gravitee.reporter.elastic.engine.impl;
 
-import io.gravitee.gateway.api.metrics.Metrics;
+import io.gravitee.gateway.api.reporter.metrics.Metrics;
+import io.gravitee.gateway.api.reporter.monitor.HealthStatus;
+import io.gravitee.gateway.api.reporter.Reportable;
 import io.gravitee.reporter.elastic.config.ElasticConfiguration;
 import io.gravitee.reporter.elastic.model.Protocol;
 import org.elasticsearch.action.bulk.BulkProcessor;
@@ -53,15 +55,20 @@ public final class ElasticReportEngine extends AbstractElasticReportEngine {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void report(Metrics metrics) {
+	public void report(Reportable reportable) {
 		try {
-			String indexName = getIndexName(metrics);
+			String indexName = getIndexName(reportable);
 
-			bulkProcessor.add(new IndexRequest(indexName, configuration.getTypeName())
-					.source(getSource(metrics)));
+			if (reportable instanceof Metrics) {
+				bulkProcessor.add(new IndexRequest(indexName, "request")
+						.source(getSource((Metrics) reportable)));
+			} else if (reportable instanceof HealthStatus) {
+				bulkProcessor.add(new IndexRequest(indexName, "health")
+						.source(getSource((HealthStatus) reportable)));
+			}
 				
 		} catch (IOException e) {
-			LOGGER.error("Request {} report failed", metrics.getRequestId(), e);
+			LOGGER.error("Request {} report failed", reportable, e);
 		}
 	}
 	

@@ -56,12 +56,6 @@ public class ElasticConfiguration {
 	private String indexName;
 	
 	/**
-	 * Prefix index name. 
-	 */
-	@Value("${reporter.elastic.type.name:request}")
-	private String typeName;	
-	
-	/**
 	 * Request actions max by bulk 
 	 */
 	@Value("${reporter.elastic.bulk.actions:1000}")
@@ -132,10 +126,6 @@ public class ElasticConfiguration {
 
 	public String getIndexName() {
 		return indexName;
-	}
-
-	public String getTypeName() {
-		return typeName;
 	}
 
 	private List<HostAddress> initializeHostsAddresses(){

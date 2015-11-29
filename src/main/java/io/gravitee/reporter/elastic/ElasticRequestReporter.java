@@ -16,10 +16,7 @@
 package io.gravitee.reporter.elastic;
 
 import io.gravitee.common.service.AbstractService;
-import io.gravitee.gateway.api.Request;
-import io.gravitee.gateway.api.Response;
-import io.gravitee.gateway.api.metrics.Metrics;
-import io.gravitee.gateway.api.reporter.MetricsReporter;
+import io.gravitee.gateway.api.reporter.Reportable;
 import io.gravitee.gateway.api.reporter.Reporter;
 import io.gravitee.reporter.elastic.engine.ReportEngine;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,14 +26,14 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author Loic DASSONVILLE (loic.dassonville at gmail.com)
  * 
  */
-public class ElasticRequestReporter extends AbstractService implements MetricsReporter {
+public class ElasticRequestReporter extends AbstractService implements Reporter {
 	  
 	@Autowired
 	private ReportEngine reportEngine;
     
 	@Override
-	public void report(Metrics metrics) {
-		reportEngine.report(metrics);
+	public void report(Reportable reportable) {
+		reportEngine.report(reportable);
 	}
 
 	@Override

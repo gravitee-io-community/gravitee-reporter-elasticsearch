@@ -15,7 +15,7 @@
  */
 package io.gravitee.reporter.elastic.engine;
 
-import io.gravitee.gateway.api.metrics.Metrics;
+import io.gravitee.gateway.api.reporter.Reportable;
 
 /**
  * Report request execution.
@@ -36,9 +36,9 @@ public interface ReportEngine {
 	void stop();
 	
 	/**
-	 * Report request execution
+	 * A reportable element
 	 * 
-	 * @param metrics
+	 * @param reportable
 	 */
-	void report(Metrics metrics);
+	void report(Reportable reportable);
 }
