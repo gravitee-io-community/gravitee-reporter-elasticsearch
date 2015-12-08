@@ -15,7 +15,7 @@
  */
 package io.gravitee.reporter.elastic.engine;
 
-import io.gravitee.gateway.api.reporter.Reportable;
+import io.gravitee.reporter.api.Reportable;
 
 /**
  * Report request execution.

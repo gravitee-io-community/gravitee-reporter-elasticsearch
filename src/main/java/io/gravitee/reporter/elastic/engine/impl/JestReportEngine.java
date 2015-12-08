@@ -15,10 +15,9 @@
  */
 package io.gravitee.reporter.elastic.engine.impl;
 
-
-import io.gravitee.gateway.api.reporter.metrics.Metrics;
-import io.gravitee.gateway.api.reporter.monitor.HealthStatus;
-import io.gravitee.gateway.api.reporter.Reportable;
+import io.gravitee.reporter.api.Reportable;
+import io.gravitee.reporter.api.metrics.Metrics;
+import io.gravitee.reporter.api.monitor.HealthStatus;
 import io.gravitee.reporter.elastic.config.ElasticConfiguration;
 import io.searchbox.client.JestClient;
 import io.searchbox.client.JestResult;

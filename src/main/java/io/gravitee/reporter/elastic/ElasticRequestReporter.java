@@ -16,8 +16,8 @@
 package io.gravitee.reporter.elastic;
 
 import io.gravitee.common.service.AbstractService;
-import io.gravitee.gateway.api.reporter.Reportable;
-import io.gravitee.gateway.api.reporter.Reporter;
+import io.gravitee.reporter.api.Reportable;
+import io.gravitee.reporter.api.Reporter;
 import io.gravitee.reporter.elastic.engine.ReportEngine;
 import org.springframework.beans.factory.annotation.Autowired;
 
