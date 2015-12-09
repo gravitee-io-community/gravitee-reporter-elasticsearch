@@ -60,7 +60,7 @@ public abstract class AbstractElasticReportEngine implements ReportEngine {
 				.field("method", metrics.getRequestHttpMethod().toString())
 				.field("request-content-type", metrics.getRequestContentType())
 				.field("response-time", metrics.getProxyResponseTimeMs())
-				.field("api-response-time", metrics.getApiResponseTimeMs())
+				.field("api-response-time", metrics.getApiResponseTimeMs() >= 0 ? metrics.getApiResponseTimeMs() : null)
 				.field("response-content-type", metrics.getResponseContentType())
 				.field("request-content-length", metrics.getRequestContentLength() >= 0 ? metrics.getRequestContentLength() : null)
 				.field("response-content-length", metrics.getResponseContentLength() >= 0 ? metrics.getResponseContentLength() : null)
