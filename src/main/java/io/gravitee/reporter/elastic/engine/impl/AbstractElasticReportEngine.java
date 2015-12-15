@@ -54,7 +54,7 @@ public abstract class AbstractElasticReportEngine implements ReportEngine {
 		return XContentFactory.jsonBuilder()
 				.startObject()
 				.field("id", metrics.getRequestId())
-				.field("uri", metrics.getRequestPath())
+				.field("uri", metrics.getRequestUri())
 				.field("path", metrics.getRequestPath())
 				.field("status", metrics.getResponseHttpStatus())
 				.field("method", metrics.getRequestHttpMethod().toString())
