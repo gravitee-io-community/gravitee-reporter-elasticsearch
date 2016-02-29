@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import io.gravitee.reporter.elastic.config.ElasticConfiguration;
 import org.elasticsearch.ExceptionsHelper;
@@ -173,15 +174,9 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
 			logger.debug("No index to prepare");
 			return;
 		}
-
 		
 		//Index creation
-		List<String> createdIndexes = new ArrayList<>();
-		for (String indexName : indexesNames) {
-			if (createIndex(indexName)) {
-				createdIndexes.add(indexName);
-			}
-		}
+		List<String> createdIndexes = indexesNames.stream().filter(this::createIndex).collect(Collectors.toList());
 
 		createRequestMapping(createdIndexes);
 		createHealthMapping(createdIndexes);

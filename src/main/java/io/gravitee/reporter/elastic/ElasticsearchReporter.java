@@ -22,11 +22,10 @@ import io.gravitee.reporter.elastic.engine.ReportEngine;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * 
- * @author Loic DASSONVILLE (loic.dassonville at gmail.com)
- * 
+ * @author David BRASSELY (brasseld at gmail.com)
+ * @author GraviteeSource Team
  */
-public class ElasticRequestReporter extends AbstractService implements Reporter {
+public class ElasticsearchReporter extends AbstractService implements Reporter {
 	  
 	@Autowired
 	private ReportEngine reportEngine;

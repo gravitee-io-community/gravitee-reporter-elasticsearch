@@ -16,9 +16,8 @@
 package io.gravitee.reporter.elastic.engine.impl;
 
 import io.gravitee.reporter.api.Reportable;
-import io.gravitee.reporter.api.metrics.Metrics;
+import io.gravitee.reporter.api.http.RequestMetrics;
 import io.gravitee.reporter.api.monitor.HealthStatus;
-import io.gravitee.reporter.elastic.config.ElasticConfiguration;
 import io.gravitee.reporter.elastic.model.Protocol;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.index.IndexRequest;
@@ -48,9 +47,6 @@ public final class ElasticReportEngine extends AbstractElasticReportEngine {
 	@Autowired
 	private BulkProcessor bulkProcessor;
 
-	@Autowired
-	private ElasticConfiguration configuration;
-
 	/**
 	 * {@inheritDoc}
 	 */
@@ -59,9 +55,9 @@ public final class ElasticReportEngine extends AbstractElasticReportEngine {
 		try {
 			String indexName = getIndexName(reportable);
 
-			if (reportable instanceof Metrics) {
+			if (reportable instanceof RequestMetrics) {
 				bulkProcessor.add(new IndexRequest(indexName, "request")
-						.source(getSource((Metrics) reportable)));
+						.source(getSource((RequestMetrics) reportable)));
 			} else if (reportable instanceof HealthStatus) {
 				bulkProcessor.add(new IndexRequest(indexName, "health")
 						.source(getSource((HealthStatus) reportable)));
@@ -90,7 +86,6 @@ public final class ElasticReportEngine extends AbstractElasticReportEngine {
 	@Override
 	public void stop() {
 		LOGGER.info("Stopping Elastic reporter engine...");
-		bulkProcessor.flush();
 
 		try {
 			bulkProcessor.awaitClose(30, TimeUnit.SECONDS);

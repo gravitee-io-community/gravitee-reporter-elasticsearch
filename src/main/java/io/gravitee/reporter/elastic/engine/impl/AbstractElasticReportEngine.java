@@ -16,7 +16,7 @@
 package io.gravitee.reporter.elastic.engine.impl;
 
 import io.gravitee.reporter.api.Reportable;
-import io.gravitee.reporter.api.metrics.Metrics;
+import io.gravitee.reporter.api.http.RequestMetrics;
 import io.gravitee.reporter.api.monitor.HealthStatus;
 import io.gravitee.reporter.elastic.config.ElasticConfiguration;
 import io.gravitee.reporter.elastic.engine.ReportEngine;
@@ -29,8 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.sql.Date;
-import java.text.SimpleDateFormat;
-import java.util.TimeZone;
+import java.time.ZoneId;
 
 public abstract class AbstractElasticReportEngine implements ReportEngine {
 
@@ -38,19 +37,17 @@ public abstract class AbstractElasticReportEngine implements ReportEngine {
 	private ElasticConfiguration configuration;
 
 	/** Index simple date format **/
-	private SimpleDateFormat sdf;
+	private java.time.format.DateTimeFormatter sdf;
 
 	/** Document simple date format **/
 	private DateTimeFormatter dtf;
 
 	public AbstractElasticReportEngine() {
-		this.sdf = new SimpleDateFormat("yyyy.MM.dd");
-		this.sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-
+		this.sdf = java.time.format.DateTimeFormatter.ofPattern("yyyy.MM.dd").withZone(ZoneId.systemDefault());
 		this.dtf = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ");
 	}
 
-	protected XContentBuilder getSource(Metrics metrics) throws IOException{
+	protected XContentBuilder getSource(RequestMetrics metrics) throws IOException{
 		return XContentFactory.jsonBuilder()
 				.startObject()
 				.field("id", metrics.getRequestId())
@@ -84,8 +81,7 @@ public abstract class AbstractElasticReportEngine implements ReportEngine {
 				.endObject();
 	}
 
-
 	protected String getIndexName(Reportable reportable){
-		return String.format("%s-%s", configuration.getIndexName(), sdf.format(Date.from(reportable.timestamp())));
+		return String.format("%s-%s", configuration.getIndexName(), sdf.format(reportable.timestamp()));
 	}
 }

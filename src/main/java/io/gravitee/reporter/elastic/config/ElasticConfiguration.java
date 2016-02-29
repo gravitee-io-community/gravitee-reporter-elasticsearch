@@ -58,7 +58,7 @@ public class ElasticConfiguration {
 	/**
 	 * Request actions max by bulk 
 	 */
-	@Value("${reporter.elastic.bulk.actions:1000}")
+	@Value("${reporter.elastic.bulk.actions:10000}")
 	private Integer bulkActions;
 	
 	/**
@@ -76,7 +76,7 @@ public class ElasticConfiguration {
 	/**
 	 * Accepted concurrent request
 	 */
-	@Value("${reporter.elastic.bulk.concurrent_requests:5}")		
+	@Value("${reporter.elastic.bulk.concurrent_requests:2}")
 	private Integer concurrentRequests ;
 
 	/**

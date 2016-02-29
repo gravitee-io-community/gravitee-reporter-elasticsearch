@@ -16,7 +16,7 @@
 package io.gravitee.reporter.elastic;
 
 import io.gravitee.common.http.HttpMethod;
-import io.gravitee.reporter.api.metrics.Metrics;
+import io.gravitee.reporter.api.http.RequestMetrics;
 import io.gravitee.reporter.elastic.spring.ReporterConfiguration;
 import org.junit.Assert;
 import org.junit.Test;
@@ -30,20 +30,20 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
  * @author Loic DASSONVILLE (loic.dassonville at gmail.com)
  *
  */
-public class ElasticRequestReporterTest {
+public class ElasticsearchReporterTest {
 
 	protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
 	public static final String CONFIG_PATH = "/config/local-elastic.properties";
 
-	public ElasticRequestReporter reporter;
+	public ElasticsearchReporter reporter;
 
 	//@Before
 	public void init() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ReporterConfiguration.class);
 		ctx.refresh();
-		this.reporter = ctx.getBean(ElasticRequestReporter.class);
+		this.reporter = ctx.getBean(ElasticsearchReporter.class);
 	}
 	
 	@Test
@@ -56,7 +56,7 @@ public class ElasticRequestReporterTest {
 	public void singleReportTest() {
 
 		try {
-			Metrics metrics = Mockito.mock(Metrics.class);
+			RequestMetrics metrics = Mockito.mock(RequestMetrics.class);
 
 			Mockito.when(metrics.getRequestHttpMethod()).thenReturn(HttpMethod.GET);
 			Mockito.when(metrics.getRequestPath()).thenReturn("/customers/");

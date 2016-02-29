@@ -18,13 +18,9 @@ package io.gravitee.reporter.elastic.spring;
 import io.gravitee.reporter.elastic.config.ElasticConfiguration;
 import io.gravitee.reporter.elastic.engine.ReportEngine;
 import io.gravitee.reporter.elastic.engine.impl.ElasticReportEngine;
-import io.gravitee.reporter.elastic.engine.impl.JestReportEngine;
-import io.gravitee.reporter.elastic.model.Protocol;
 import io.gravitee.reporter.elastic.spring.conditional.ElasticClientTransportCondition;
-import io.gravitee.reporter.elastic.spring.conditional.JestClientCondition;
 import io.gravitee.reporter.elastic.spring.factory.ElasticBulkProcessorFactory;
 import io.gravitee.reporter.elastic.spring.factory.ElasticClientFactory;
-import io.gravitee.reporter.elastic.spring.factory.JestClientFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
@@ -32,11 +28,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ReporterConfiguration {
 
-	@Bean @Conditional(JestClientCondition.class)
-    public JestClientFactory httpClientFactory() {
-        return new JestClientFactory();
-    }
-	
 	@Bean @Conditional(ElasticClientTransportCondition.class)
     public ElasticClientFactory elasticClientFactory() {
         return new ElasticClientFactory();
@@ -48,10 +39,7 @@ public class ReporterConfiguration {
     }
 	
 	@Bean
-	public ReportEngine reportEngine(ElasticConfiguration configuration){
-		if(Protocol.HTTP.equals(configuration.getProtocol())){
-			return new JestReportEngine();
-		}
+	public ReportEngine reportEngine(){
 		return new ElasticReportEngine();
 	}
 
