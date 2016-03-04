@@ -58,26 +58,20 @@ public class ElasticConfiguration {
 	/**
 	 * Request actions max by bulk 
 	 */
-	@Value("${reporter.elastic.bulk.actions:10000}")
+	@Value("${reporter.elastic.bulk.actions:5000}")
 	private Integer bulkActions;
-	
-	/**
-	 * Bulk size in Mo
-	 */
-	@Value("${reporter.elastic.bulk.size:5}")	
-	private Long bulkSize;
 	
 	/**
 	 * Bulk flush interval in seconds
 	 */
-	@Value("${reporter.elastic.bulk.flush_interval:1}")		
+	@Value("${reporter.elastic.bulk.flush_interval:5}")
 	private Long flushInterval;
 	
 	/**
 	 * Accepted concurrent request
 	 */
-	@Value("${reporter.elastic.bulk.concurrent_requests:2}")
-	private Integer concurrentRequests ;
+	@Value("${reporter.elastic.bulk.concurrent_requests:5}")
+	private Integer concurrentRequests;
 
 	/**
 	 * Elasticsearch hosts
@@ -110,10 +104,6 @@ public class ElasticConfiguration {
 
 	public Integer getBulkActions() {
 		return bulkActions;
-	}
-
-	public Long getBulkSize() {
-		return bulkSize;
 	}
 
 	public Long getFlushInterval() {

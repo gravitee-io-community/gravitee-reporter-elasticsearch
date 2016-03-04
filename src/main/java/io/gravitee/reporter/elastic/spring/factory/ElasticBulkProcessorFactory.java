@@ -14,227 +14,168 @@
  * limitations under the License.
  */
 package io.gravitee.reporter.elastic.spring.factory;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import io.gravitee.reporter.elastic.config.ElasticConfiguration;
-import org.elasticsearch.ExceptionsHelper;
+import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.IndicesRequest;
-import org.elasticsearch.action.admin.indices.get.GetIndexRequestBuilder;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.common.unit.ByteSizeUnit;
 import org.elasticsearch.common.unit.ByteSizeValue;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentFactory;
-import org.elasticsearch.indices.IndexAlreadyExistsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
 
+import java.io.IOException;
+import java.util.stream.Stream;
+
+/**
+ * @author David BRASSELY (brasseld at gmail.com)
+ * @author GraviteeSource Team
+ */
 public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcessor> {
 
-	private Logger logger = LoggerFactory.getLogger(ElasticBulkProcessorFactory.class);
-	
-	@Autowired
-	private Client client;
-	
-	@Autowired
-	private ElasticConfiguration config;
+    private final Logger LOGGER = LoggerFactory.getLogger(ElasticBulkProcessorFactory.class);
 
-	@Override
-	public Class<?> getObjectType() {
-		return BulkProcessor.class;
-	}
-	
-	@Override
-	protected BulkProcessor createInstance() throws Exception {
-	
-		return BulkProcessor.builder(
-		        client,  
-		        new BulkProcessor.Listener() {
+    private final static String FIELD_TYPE = "type";
+    private final static String FIELD_TYPE_STRING = "string";
+    private final static String FIELD_INDEX = "index";
+    private final static String FIELD_INDEX_NOT_ANALYZED = "not_analyzed";
 
-					@Override
-					public void beforeBulk(long executionId, BulkRequest request) {
-						initAllIndexes(executionId, request);
-					}
+    @Autowired
+    private Client client;
 
-					@Override
-					public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
-						// TODO Auto-generated method stub
-					}
+    @Autowired
+    private ElasticConfiguration config;
 
-					@Override
-					public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
-						// TODO Auto-generated method stub
-					}})
-		        .setBulkActions(config.getBulkActions()) 
-		        .setBulkSize(new ByteSizeValue(config.getBulkSize(), ByteSizeUnit.MB)) 
-		        .setFlushInterval(TimeValue.timeValueSeconds(config.getFlushInterval())) 
-		        .setConcurrentRequests(config.getConcurrentRequests()) 
-		        .build();
-	}
+    @Override
+    public Class<?> getObjectType() {
+        return BulkProcessor.class;
+    }
 
-	
-	private void initAllIndexes(long executionId, BulkRequest request){
-		
-		try{
-			List<? extends IndicesRequest> indicesRequests = request.subRequests();
-			HashSet<String> indexes = new HashSet<>();
-			
-			//Building used indices list
-			for (IndicesRequest actionRequest : indicesRequests) {
-				indexes.addAll(Arrays.asList(actionRequest.indices()));
-			}
-			
-			createIndexesMapping(indexes);
-			
-		}catch(Exception e){
-			logger.error("Fail to initialized indexes", e);
-		}
-	}
+    @Override
+    protected BulkProcessor createInstance() throws Exception {
+        return BulkProcessor.builder(
+                client,
+                new BulkProcessor.Listener() {
+                    @Override
+                    public void beforeBulk(long executionId, BulkRequest request) {
+                        if (request.numberOfActions() > 0) {
+                            initializeIndices(request);
+                        }
+                    }
 
-	/**
-	 * 
-	 * @param indexes
-	 * @return
-	 */
-	private Collection<String> resolveMissingIndexes(Collection<String> indexes){
-		
-		// Search existing indexes
-		 Collection<String> exisitingIndexes = searchIndexes(indexes);
-					
-		//Computing missing indexes
-		Set<String> indexesMissing = new HashSet<>(indexes);
-		indexesMissing.removeAll(Arrays.asList(exisitingIndexes));
-		
-		return indexesMissing;
-	}
-	
-	/**
-	 * Search index with the given name
-	 * 
-	 * @param indexes Index to check
-	 * @return existing indexes from the list
-	 */
-	private Collection<String> searchIndexes(Collection<String> indexes){
-	
-		//TODO deal with missing index exceptions
-		
-		//Searching existing indexes
-		String[] searchedIndexes = indexes.toArray(new String[indexes.size()]);
-		GetIndexRequestBuilder builder = new GetIndexRequestBuilder(client.admin().indices(), searchedIndexes);
-		String[] exisitingIndexes = builder.get().indices();
-		
-		return Arrays.asList(exisitingIndexes);
-	}
-	
-	/**
-	 * Create elasticsearch index.
-	 * 
-	 * @param indexName Index name
-	 * @return true success
-	 */
-	private boolean createIndex(String indexName) {
-		try {
-			logger.debug("Trying to create index [{}]", indexName);
-			client.admin().indices().prepareCreate(indexName).execute().actionGet();
-			logger.debug("index created [{}]", indexName);
+                    @Override
+                    public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
+                    }
 
-			return true;
+                    @Override
+                    public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
+                        LOGGER.error("Unexpected error while bulk-indexing data.", failure);
+                    }
+                })
+                .setBulkActions(config.getBulkActions())
+                .setBulkSize(new ByteSizeValue(-1))
+                .setFlushInterval(TimeValue.timeValueSeconds(config.getFlushInterval()))
+                .setConcurrentRequests(config.getConcurrentRequests())
+                .build();
+    }
 
-		} catch (Exception e) {
-			if (ExceptionsHelper.unwrapCause(e) instanceof IndexAlreadyExistsException) {
-				logger.debug("Index [{}] already exists, skipping...", indexName);
-			} else {
-				logger.error("Index [{}] initialization failed.", indexName);
-			}
-		}
-		return false;
-	}
 
-	/**
-	 * Create index mappings.
-	 * 
-	 * @param indexesNames Index to be configured
-	 */
-	private void createIndexesMapping(Collection<String> indexesNames) {
+    private void initializeIndices(BulkRequest request) {
+        try {
+            String[] indicesToCreate = request.subRequests().stream()
+                    .map(IndicesRequest::indices)
+                    .flatMap(Stream::of)
+                    .distinct()
+                    .filter(this::create)
+                    .toArray(String[]::new);
 
-		// If nothing to do, we skip
-		if (indexesNames == null || indexesNames.isEmpty()) {
-			logger.debug("No index to prepare");
-			return;
-		}
-		
-		//Index creation
-		List<String> createdIndexes = indexesNames.stream().filter(this::createIndex).collect(Collectors.toList());
+            if (indicesToCreate.length > 0) {
+                createRequestMapping(indicesToCreate);
+                createHealthMapping(indicesToCreate);
+            }
+        } catch (Exception ex) {
+            LOGGER.error("An error occurs while creating indices", ex);
+        }
+    }
 
-		createRequestMapping(createdIndexes);
-		createHealthMapping(createdIndexes);
-	}
+    /**
+     * Create elasticsearch index.
+     *
+     * @param indexName Index name
+     * @return true success
+     */
+    private boolean create(String indexName) {
+        try {
+            LOGGER.debug("Looking for index [{}]", indexName);
+            client.admin().indices().prepareCreate(indexName).execute().actionGet();
+            return true;
+        } catch (org.elasticsearch.indices.IndexAlreadyExistsException iaee) {
+            return false;
+        } catch (Exception ex) {
+            LOGGER.error("An error occurs while looking for index", indexName, ex);
+        }
+        return false;
+    }
 
-	private void createRequestMapping(List<String> createdIndexes) {
-		String typeName = "request";
+    private void createRequestMapping(String[] indicesToCreate) {
+        String typeName = "request";
 
-		// Index mapping configuration
-		try {
-			String mapping = XContentFactory.jsonBuilder()
-					.startObject()
-					.startObject(typeName)
-					.startObject("properties")
-					.startObject("id").field("type", "string").field("index", "not_analyzed").endObject()
-					.startObject("api").field("type", "string").field("index", "not_analyzed").endObject()
-					.startObject("application").field("type", "string").field("index", "not_analyzed").endObject()
-					.startObject("api-key").field("type", "string").field("index", "not_analyzed").endObject()
-					.startObject("hostname").field("type", "string").field("index", "not_analyzed").endObject()
-					.startObject("uri").field("type", "string").field("index", "not_analyzed").endObject()
-					.startObject("path").field("type", "string").field("index", "not_analyzed").endObject()
-					.endObject().
-							endObject()
-					.endObject()
-					.string();
+        try {
+            createMapping(indicesToCreate, typeName,
+                    XContentFactory.jsonBuilder()
+                    .startObject()
+                    .startObject(typeName)
+                    .startObject("properties")
+                    .startObject("id").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                    .startObject("api").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                    .startObject("application").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                    .startObject("api-key").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                    .startObject("hostname").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                    .startObject("uri").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                    .startObject("path").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                    .endObject()
+                    .endObject()
+                    .endObject()
+                    .string());
+        } catch (IOException ex) {
+            LOGGER.error("Error creating indices mapping [{}]", indicesToCreate, ex);
+        }
+    }
 
-			logger.debug("Applying default mapping for [{}]/[{}]: {}", createdIndexes, typeName, mapping);
-			client.admin().indices().preparePutMapping(createdIndexes.toArray(new String[createdIndexes.size()]))
-					.setType(typeName).setSource(mapping).execute().actionGet();
+    private void createHealthMapping(String[] indicesToCreate) {
+        String typeName = "health";
 
-		} catch (IOException e) {
-			logger.error("Error creating indexes mapping [{}]", createdIndexes);
-		}
-	}
+        try {
+            createMapping(indicesToCreate, typeName,
+                    XContentFactory.jsonBuilder()
+                            .startObject()
+                            .startObject(typeName)
+                            .startObject("properties")
+                            .startObject("api").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                            .startObject("hostname").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                            .endObject()
+                            .endObject()
+                            .endObject()
+                            .string());
+        } catch (IOException ex) {
+            LOGGER.error("Error creating indices mapping [{}]", indicesToCreate, ex);
+        }
+    }
 
-	private void createHealthMapping(List<String> createdIndexes) {
-		String typeName = "health";
-
-		// Index mapping configuration
-		try {
-			String mapping = XContentFactory.jsonBuilder()
-					.startObject()
-					.startObject(typeName)
-					.startObject("properties")
-					.startObject("api").field("type", "string").field("index", "not_analyzed").endObject()
-					.startObject("hostname").field("type", "string").field("index", "not_analyzed").endObject()
-					.endObject().
-							endObject()
-					.endObject()
-					.string();
-
-			logger.debug("Applying default mapping for [{}]/[{}]: {}", createdIndexes, typeName, mapping);
-			client.admin().indices().preparePutMapping(createdIndexes.toArray(new String[createdIndexes.size()]))
-					.setType(typeName).setSource(mapping).execute().actionGet();
-
-		} catch (IOException e) {
-			logger.error("Error creating indexes mapping [{}]", createdIndexes);
-		}
-	}
+    private void createMapping(String[] indices, String type, String mapping) {
+        try {
+            LOGGER.debug("Applying mapping for [{}]/[{}]: {}", indices, type, mapping);
+            client.admin().indices().preparePutMapping(indices)
+                    .setType(type).setSource(mapping).execute().actionGet();
+        } catch (ElasticsearchException eex) {
+            LOGGER.error("Error creating indices mapping [{}]", indices, eex);
+        }
+    }
 }
 
