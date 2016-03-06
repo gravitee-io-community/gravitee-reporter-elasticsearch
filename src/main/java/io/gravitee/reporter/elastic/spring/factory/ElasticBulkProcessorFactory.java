@@ -98,6 +98,7 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
             if (indicesToCreate.length > 0) {
                 createRequestMapping(indicesToCreate);
                 createHealthMapping(indicesToCreate);
+                createMonitorMapping(indicesToCreate);
             }
         } catch (Exception ex) {
             LOGGER.error("An error occurs while creating indices", ex);
@@ -158,6 +159,26 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
                             .startObject(typeName)
                             .startObject("properties")
                             .startObject("api").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                            .startObject("hostname").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                            .endObject()
+                            .endObject()
+                            .endObject()
+                            .string());
+        } catch (IOException ex) {
+            LOGGER.error("Error creating indices mapping [{}]", indicesToCreate, ex);
+        }
+    }
+
+    private void createMonitorMapping(String[] indicesToCreate) {
+        String typeName = "monitor";
+
+        try {
+            createMapping(indicesToCreate, typeName,
+                    XContentFactory.jsonBuilder()
+                            .startObject()
+                            .startObject(typeName)
+                            .startObject("properties")
+                            .startObject("gateway").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                             .startObject("hostname").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                             .endObject()
                             .endObject()

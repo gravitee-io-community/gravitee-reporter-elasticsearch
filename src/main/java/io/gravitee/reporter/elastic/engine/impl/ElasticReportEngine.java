@@ -17,7 +17,8 @@ package io.gravitee.reporter.elastic.engine.impl;
 
 import io.gravitee.reporter.api.Reportable;
 import io.gravitee.reporter.api.http.RequestMetrics;
-import io.gravitee.reporter.api.monitor.HealthStatus;
+import io.gravitee.reporter.api.health.HealthStatus;
+import io.gravitee.reporter.api.monitor.Monitor;
 import io.gravitee.reporter.elastic.model.Protocol;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.index.IndexRequest;
@@ -61,8 +62,10 @@ public final class ElasticReportEngine extends AbstractElasticReportEngine {
 			} else if (reportable instanceof HealthStatus) {
 				bulkProcessor.add(new IndexRequest(indexName, "health")
 						.source(getSource((HealthStatus) reportable)));
+			} else if (reportable instanceof Monitor) {
+				bulkProcessor.add(new IndexRequest(indexName, "monitor")
+						.source(getSource((Monitor) reportable)));
 			}
-				
 		} catch (IOException e) {
 			LOGGER.error("Request {} report failed", reportable, e);
 		}
