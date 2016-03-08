@@ -22,7 +22,7 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
 
 abstract class AbstractElasticClientCondition implements Condition {
 
-	private static final String PROTOCOL_CONFIG_KEY = "reporter.elastic.protocol";
+	private static final String PROTOCOL_CONFIG_KEY = "reporters.elastic.protocol";
 
 	@Override
 	public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {

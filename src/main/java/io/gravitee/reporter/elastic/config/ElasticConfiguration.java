@@ -40,37 +40,37 @@ public class ElasticConfiguration {
 	/**
 	 *  Client communication protocol. 
 	 */
-	@Value("${reporter.elastic.protocol:TRANSPORT}")
+	@Value("${reporters.elastic.protocol:TRANSPORT}")
 	private Protocol protocol;
 	
 	/**
 	 * Cluster name. Used only for node protocol
 	 */
-	@Value("${reporter.elastic.cluster.name:elasticsearch}")
+	@Value("${reporters.elastic.cluster.name:elasticsearch}")
 	private String clusterName;
 	
 	/**
 	 * Prefix index name. 
 	 */
-	@Value("${reporter.elastic.index.name:gravitee}")
+	@Value("${reporters.elastic.index.name:gravitee}")
 	private String indexName;
 	
 	/**
 	 * Request actions max by bulk 
 	 */
-	@Value("${reporter.elastic.bulk.actions:5000}")
+	@Value("${reporters.elastic.bulk.actions:5000}")
 	private Integer bulkActions;
 	
 	/**
 	 * Bulk flush interval in seconds
 	 */
-	@Value("${reporter.elastic.bulk.flush_interval:5}")
+	@Value("${reporters.elastic.bulk.flush_interval:5}")
 	private Long flushInterval;
 	
 	/**
 	 * Accepted concurrent request
 	 */
-	@Value("${reporter.elastic.bulk.concurrent_requests:5}")
+	@Value("${reporters.elastic.bulk.concurrent_requests:5}")
 	private Integer concurrentRequests;
 
 	/**
