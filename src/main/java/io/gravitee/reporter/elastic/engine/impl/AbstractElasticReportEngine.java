@@ -73,6 +73,7 @@ public abstract class AbstractElasticReportEngine implements ReportEngine {
 				.field("application", metrics.getApplication())
 				.field("local-address", metrics.getRequestLocalAddress())
 				.field("remote-address", metrics.getRequestRemoteAddress())
+				.field("endpoint", metrics.getEndpoint())
 				.field(Fields.HOSTNAME, InetAddress.getLocalHost().getHostName())
 				.field(Fields.SPECIAL_TIMESTAMP, Date.from(metrics.timestamp()), dtf)
 				.endObject();
