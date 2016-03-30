@@ -28,7 +28,8 @@ import java.util.List;
  * Elasticsearch client reporter configuration.
  *  
  * @author Loic DASSONVILLE (loic.dassonville at gmail.com)
- *
+ * @author David BRASSELY (brasseld at gmail.com)
+ * @author GraviteeSource Team
  */
 public class ElasticConfiguration {
 	
@@ -46,13 +47,13 @@ public class ElasticConfiguration {
 	/**
 	 * Cluster name. Used only for node protocol
 	 */
-	@Value("${reporters.elastic.cluster.name:elasticsearch}")
+	@Value("${reporters.elastic.cluster:elasticsearch}")
 	private String clusterName;
 	
 	/**
 	 * Prefix index name. 
 	 */
-	@Value("${reporters.elastic.index.name:gravitee}")
+	@Value("${reporters.elastic.index:gravitee}")
 	private String indexName;
 	
 	/**
@@ -77,8 +78,6 @@ public class ElasticConfiguration {
 	 * Elasticsearch hosts
 	 */
 	private List<HostAddress> hostsAddresses;
-	
-	private List<String> hostsUrls;
 
 	public Protocol getProtocol() {
 		return protocol;
@@ -93,13 +92,6 @@ public class ElasticConfiguration {
 			hostsAddresses = initializeHostsAddresses();
 		}
 		return hostsAddresses;
-	}
-	
-	public List<String> getHostsUrls() {
-		if(hostsUrls == null){
-			hostsUrls = initializeHostsUrls();
-		}
-		return hostsUrls;
 	}
 
 	public Integer getBulkActions() {
@@ -119,7 +111,7 @@ public class ElasticConfiguration {
 	}
 
 	private List<HostAddress> initializeHostsAddresses(){
-		String key = String.format("reporter.elastic.hosts[%s]", 0);
+		String key = String.format("reporters.elastic.hosts[%s]", 0);
 		List<HostAddress> res = new ArrayList<>();
 		
 		while (environment.containsProperty(key)) {
@@ -136,28 +128,12 @@ public class ElasticConfiguration {
 				res.add(new HostAddress(serializedHost.trim(), protocol.getDefaultPort()));
 			}
 			
-			key = String.format("reporter.elastic.hosts[%s]", res.size());
+			key = String.format("reporters.elastic.hosts[%s]", res.size());
 		}
 		
 		// Use default host if required
 		if(res.isEmpty()){
 			res.add(new HostAddress("localhost", protocol.getDefaultPort()));
-		}
-		return res;
-	}
-	
-	public List<String> initializeHostsUrls() {
-		String key = String.format("reporter.elastic.hosts[%s]", 0);
-		List<String> res = new ArrayList<>();
-		
-		while (environment.containsProperty(key)) {
-			res.add(environment.getProperty(key));
-			key = String.format("reporter.elastic.hosts[%s]", res.size());
-		}
-		
-		// Use default host if required
-		if(res.isEmpty()){
-			res.add("http://localhost:9200/");
 		}
 		return res;
 	}
