@@ -28,7 +28,7 @@
 
 	<groupId>io.gravitee.reporter</groupId>
 	<artifactId>gravitee-reporter-es</artifactId>
-	<version>0.8.0-SNAPSHOT</version>
+	<version>0.8.0</version>
 	<packaging>jar</packaging>
 
 	<name>Gravitee IO - Reporter - Elasticsearch</name>
@@ -37,7 +37,7 @@
 		<!-- Gravitee's project versions -->
 		<gravitee-gateway-api.version>0.9.0</gravitee-gateway-api.version>
 		<gravitee-reporter-api.version>0.6.0</gravitee-reporter-api.version>
-		<gravitee-policy-api.version>0.6.0</gravitee-policy-api.version>
+		<gravitee-policy-api.version>0.7.0</gravitee-policy-api.version>
 
 		<!-- External project versions -->
 		<es.version>1.7.5</es.version>
