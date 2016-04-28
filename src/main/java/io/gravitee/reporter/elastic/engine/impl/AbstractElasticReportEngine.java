@@ -22,13 +22,13 @@ import io.gravitee.reporter.api.monitor.JvmInfo;
 import io.gravitee.reporter.api.monitor.Monitor;
 import io.gravitee.reporter.elastic.config.ElasticConfiguration;
 import io.gravitee.reporter.elastic.engine.ReportEngine;
-import org.elasticsearch.common.joda.time.format.DateTimeFormat;
-import org.elasticsearch.common.joda.time.format.DateTimeFormatter;
 import org.elasticsearch.common.unit.ByteSizeValue;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentBuilderString;
 import org.elasticsearch.common.xcontent.XContentFactory;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -84,10 +84,6 @@ public abstract class AbstractElasticReportEngine implements ReportEngine {
 				.startObject()
 				.field("api", healthStatus.getApi())
 				.field("status", healthStatus.getStatus())
-				.field("url", healthStatus.getUrl())
-				.field("method", healthStatus.getMethod())
-				.field("success", healthStatus.isSuccess())
-				.field("message", healthStatus.getMessage())
 				.field(Fields.HOSTNAME, InetAddress.getLocalHost().getHostName())
 				.field(Fields.SPECIAL_TIMESTAMP, Date.from(healthStatus.timestamp()), dtf)
 				.endObject();
