@@ -16,8 +16,8 @@
 package io.gravitee.reporter.elastic.engine.impl;
 
 import io.gravitee.reporter.api.Reportable;
-import io.gravitee.reporter.api.http.RequestMetrics;
 import io.gravitee.reporter.api.health.HealthStatus;
+import io.gravitee.reporter.api.http.RequestMetrics;
 import io.gravitee.reporter.api.monitor.JvmInfo;
 import io.gravitee.reporter.api.monitor.Monitor;
 import io.gravitee.reporter.elastic.config.ElasticConfiguration;
@@ -84,6 +84,10 @@ public abstract class AbstractElasticReportEngine implements ReportEngine {
 				.startObject()
 				.field("api", healthStatus.getApi())
 				.field("status", healthStatus.getStatus())
+				.field("url", healthStatus.getUrl())
+				.field("method", healthStatus.getMethod())
+				.field("success", healthStatus.isSuccess())
+				.field("message", healthStatus.getMessage())
 				.field(Fields.HOSTNAME, InetAddress.getLocalHost().getHostName())
 				.field(Fields.SPECIAL_TIMESTAMP, Date.from(healthStatus.timestamp()), dtf)
 				.endObject();
