@@ -16,19 +16,19 @@
 package io.gravitee.reporter.elastic.engine.impl;
 
 import io.gravitee.reporter.api.Reportable;
-import io.gravitee.reporter.api.http.RequestMetrics;
 import io.gravitee.reporter.api.health.HealthStatus;
+import io.gravitee.reporter.api.http.RequestMetrics;
 import io.gravitee.reporter.api.monitor.JvmInfo;
 import io.gravitee.reporter.api.monitor.Monitor;
 import io.gravitee.reporter.elastic.config.ElasticConfiguration;
 import io.gravitee.reporter.elastic.engine.ReportEngine;
-import org.elasticsearch.common.joda.time.format.DateTimeFormat;
-import org.elasticsearch.common.joda.time.format.DateTimeFormatter;
 import org.elasticsearch.common.unit.ByteSizeValue;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentBuilderString;
 import org.elasticsearch.common.xcontent.XContentFactory;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
