@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.sql.Date;
 import java.time.ZoneId;
 import java.util.Arrays;
@@ -48,6 +49,17 @@ public abstract class AbstractElasticReportEngine implements ReportEngine {
 
 	/** Document simple date format **/
 	private DateTimeFormatter dtf;
+
+	private static String hostname;
+
+	static {
+		try {
+			hostname = InetAddress.getLocalHost().getHostName();
+		} catch (UnknownHostException e) {
+			hostname = "unknown";
+		}
+
+	}
 
 	public AbstractElasticReportEngine() {
 		this.sdf = java.time.format.DateTimeFormatter.ofPattern("yyyy.MM.dd").withZone(ZoneId.systemDefault());
@@ -74,7 +86,7 @@ public abstract class AbstractElasticReportEngine implements ReportEngine {
 				.field("local-address", metrics.getRequestLocalAddress())
 				.field("remote-address", metrics.getRequestRemoteAddress())
 				.field("endpoint", metrics.getEndpoint())
-				.field(Fields.HOSTNAME, InetAddress.getLocalHost().getHostName())
+				.field(Fields.HOSTNAME, hostname)
 				.field(Fields.SPECIAL_TIMESTAMP, Date.from(metrics.timestamp()), dtf)
 				.endObject();
 	}
@@ -88,7 +100,7 @@ public abstract class AbstractElasticReportEngine implements ReportEngine {
 				.field("method", healthStatus.getMethod())
 				.field("success", healthStatus.isSuccess())
 				.field("message", healthStatus.getMessage())
-				.field(Fields.HOSTNAME, InetAddress.getLocalHost().getHostName())
+				.field(Fields.HOSTNAME, hostname)
 				.field(Fields.SPECIAL_TIMESTAMP, Date.from(healthStatus.timestamp()), dtf)
 				.endObject();
 	}
@@ -205,7 +217,7 @@ public abstract class AbstractElasticReportEngine implements ReportEngine {
 		}
 
 		builder.field(Fields.GATEWAY, monitor.gateway())
-				.field(Fields.HOSTNAME, InetAddress.getLocalHost().getHostName())
+				.field(Fields.HOSTNAME, hostname)
 				.field(Fields.SPECIAL_TIMESTAMP, Date.from(monitor.timestamp()), dtf)
 				.endObject();
 
