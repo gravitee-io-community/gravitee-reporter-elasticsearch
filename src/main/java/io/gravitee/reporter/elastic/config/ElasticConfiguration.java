@@ -26,9 +26,8 @@ import java.util.List;
 
 /**
  * Elasticsearch client reporter configuration.
- *  
- * @author Loic DASSONVILLE (loic.dassonville at gmail.com)
- * @author David BRASSELY (brasseld at gmail.com)
+ *
+ * @author David BRASSELY (david at gravitee.io)
  * @author GraviteeSource Team
  */
 public class ElasticConfiguration {
@@ -41,37 +40,37 @@ public class ElasticConfiguration {
 	/**
 	 *  Client communication protocol. 
 	 */
-	@Value("${reporters.elastic.protocol:TRANSPORT}")
+	@Value("${reporters.elasticsearch.protocol:TRANSPORT}")
 	private Protocol protocol;
 	
 	/**
 	 * Cluster name. Used only for node protocol
 	 */
-	@Value("${reporters.elastic.cluster:elasticsearch}")
+	@Value("${reporters.elasticsearch.cluster:elasticsearch}")
 	private String clusterName;
 	
 	/**
 	 * Prefix index name. 
 	 */
-	@Value("${reporters.elastic.index:gravitee}")
+	@Value("${reporters.elasticsearch.index:gravitee}")
 	private String indexName;
 	
 	/**
 	 * Request actions max by bulk 
 	 */
-	@Value("${reporters.elastic.bulk.actions:5000}")
+	@Value("${reporters.elasticsearch.bulk.actions:5000}")
 	private Integer bulkActions;
 	
 	/**
 	 * Bulk flush interval in seconds
 	 */
-	@Value("${reporters.elastic.bulk.flush_interval:5}")
+	@Value("${reporters.elasticsearch.bulk.flush_interval:5}")
 	private Long flushInterval;
 	
 	/**
 	 * Accepted concurrent request
 	 */
-	@Value("${reporters.elastic.bulk.concurrent_requests:5}")
+	@Value("${reporters.elasticsearch.bulk.concurrent_requests:5}")
 	private Integer concurrentRequests;
 
 	/**
@@ -111,7 +110,7 @@ public class ElasticConfiguration {
 	}
 
 	private List<HostAddress> initializeHostsAddresses(){
-		String key = String.format("reporters.elastic.hosts[%s]", 0);
+		String key = String.format("reporters.elasticsearch.hosts[%s]", 0);
 		List<HostAddress> res = new ArrayList<>();
 		
 		while (environment.containsProperty(key)) {
@@ -128,7 +127,7 @@ public class ElasticConfiguration {
 				res.add(new HostAddress(serializedHost.trim(), protocol.getDefaultPort()));
 			}
 			
-			key = String.format("reporters.elastic.hosts[%s]", res.size());
+			key = String.format("reporters.elasticsearch.hosts[%s]", res.size());
 		}
 		
 		// Use default host if required
