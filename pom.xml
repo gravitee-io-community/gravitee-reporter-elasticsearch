@@ -23,7 +23,7 @@
 	<parent>
 		<groupId>io.gravitee</groupId>
 		<artifactId>gravitee-parent</artifactId>
-		<version>4</version>
+		<version>5</version>
 	</parent>
 
 	<groupId>io.gravitee.reporter</groupId>
@@ -72,14 +72,14 @@
 			<artifactId>elasticsearch</artifactId>
 			<version>${es.version}</version>
 		</dependency>
-		
+
 		<!-- Used for org.elasticsearch.script.ScriptModule.configure -->
 		<dependency>
 			<groupId>org.codehaus.groovy</groupId>
 			<artifactId>groovy-all</artifactId>
 			<version>2.3.2</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-expressions</artifactId>
