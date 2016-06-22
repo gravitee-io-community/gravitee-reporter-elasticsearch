@@ -99,6 +99,7 @@ public abstract class AbstractElasticReportEngine implements ReportEngine {
 				.field("url", healthStatus.getUrl())
 				.field("method", healthStatus.getMethod())
 				.field("success", healthStatus.isSuccess())
+				.field("state", healthStatus.getState())
 				.field("message", healthStatus.getMessage())
 				.field(Fields.HOSTNAME, hostname)
 				.field(Fields.SPECIAL_TIMESTAMP, Date.from(healthStatus.timestamp()), dtf)
