@@ -169,6 +169,7 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
                             .startObject("api").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                             .startObject("hostname").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                             .startObject("status").field(FIELD_TYPE, "integer").field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                            .startObject("state").field(FIELD_TYPE, "integer").field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                             .startObject("success").field(FIELD_TYPE, "boolean").field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                             .startObject("message").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                             .startObject("url").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
