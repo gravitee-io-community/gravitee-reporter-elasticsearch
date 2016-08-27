@@ -1,4 +1,4 @@
-[![Build Status](http://build.gravitee.io/jenkins/buildStatus/icon?job=gravitee-reporter-es)](http://build.gravitee.io/jenkins/job/gravitee-reporter-es/)
+[![Build Status](https://ci.gravitee.io/buildStatus/icon?job=gravitee-io/gravitee-reporter-es)](https://ci.gravitee.io/job/gravitee-io/job/gravitee-reporter-es/job/master/)
 
 # gravitee-reporter-es
 
