@@ -82,6 +82,8 @@ public abstract class AbstractElasticReportEngine implements ReportEngine {
 				.field("request-content-length", metrics.getRequestContentLength() >= 0 ? metrics.getRequestContentLength() : null)
 				.field("response-content-length", metrics.getResponseContentLength() >= 0 ? metrics.getResponseContentLength() : null)
 				.field("api-key", metrics.getApiKey())
+				.field("subscription", metrics.getSubscription())
+				.field("plan", metrics.getPlan())
 				.field("api", metrics.getApi())
 				.field("application", metrics.getApplication())
 				.field("local-address", metrics.getRequestLocalAddress())
