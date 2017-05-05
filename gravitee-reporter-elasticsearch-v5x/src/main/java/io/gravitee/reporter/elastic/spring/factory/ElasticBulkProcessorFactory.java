@@ -47,6 +47,7 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
     private final static String FIELD_TYPE_SHORT = "short";
     private final static String FIELD_TYPE_INTEGER = "integer";
     private final static String FIELD_TYPE_BOOLEAN = "boolean";
+    private final static String FIELD_TYPE_OBJECT = "object";
     private final static String FIELD_INDEX = "index";
     private final static String FIELD_INDEX_NOT_ANALYZED = "not_analyzed";
 
@@ -144,8 +145,8 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
                     .startObject("application").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                     .startObject("subscription").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                     .startObject("plan").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                    .startObject("user").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                     .startObject("api-key").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                    .startObject("user").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                     .startObject("hostname").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                     .startObject("uri").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                     .startObject("path").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
@@ -153,15 +154,17 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
                     .startObject("local-address").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                     .startObject("remote-address").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                     .startObject("method").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                    .startObject("response-content-type").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                    .startObject("request-content-type").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                     .startObject("tenant").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                     .startObject("status").field(FIELD_TYPE, FIELD_TYPE_SHORT).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                    .startObject("response-time").field(FIELD_TYPE, FIELD_TYPE_SHORT).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                    .startObject("api-response-time").field(FIELD_TYPE, FIELD_TYPE_SHORT).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                    .startObject("proxy-latency").field(FIELD_TYPE, FIELD_TYPE_SHORT).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                    .startObject("response-time").field(FIELD_TYPE, FIELD_TYPE_INTEGER).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                    .startObject("api-response-time").field(FIELD_TYPE, FIELD_TYPE_INTEGER).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                    .startObject("proxy-latency").field(FIELD_TYPE, FIELD_TYPE_INTEGER).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                     .startObject("request-content-length").field(FIELD_TYPE, FIELD_TYPE_INTEGER).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                     .startObject("response-content-length").field(FIELD_TYPE, FIELD_TYPE_INTEGER).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                    .startObject("client-request-headers").field(FIELD_TYPE, FIELD_TYPE_OBJECT).field("enabled", false).endObject()
+                    .startObject("client-response-headers").field(FIELD_TYPE, FIELD_TYPE_OBJECT).field("enabled", false).endObject()
+                    .startObject("proxy-request-headers").field(FIELD_TYPE, FIELD_TYPE_OBJECT).field("enabled", false).endObject()
+                    .startObject("proxy-response-headers").field(FIELD_TYPE, FIELD_TYPE_OBJECT).field("enabled", false).endObject()
                     .endObject()
                     .endObject()
                     .endObject()
