@@ -15,6 +15,7 @@
  */
 package io.gravitee.reporter.elastic.engine.impl;
 
+import io.gravitee.common.node.Node;
 import io.gravitee.reporter.api.Reportable;
 import io.gravitee.reporter.api.health.HealthStatus;
 import io.gravitee.reporter.api.http.RequestMetrics;
@@ -43,6 +44,9 @@ public abstract class AbstractElasticReportEngine implements ReportEngine {
 	@Autowired
 	private ElasticConfiguration configuration;
 
+	@Autowired
+	private Node node;
+
 	/** Index simple date format **/
 	private java.time.format.DateTimeFormatter sdf;
 
@@ -68,6 +72,7 @@ public abstract class AbstractElasticReportEngine implements ReportEngine {
 	protected XContentBuilder getSource(RequestMetrics metrics) throws IOException {
 		return XContentFactory.jsonBuilder()
 				.startObject()
+				.field(Fields.GATEWAY, node.id())
 				.field("id", metrics.getRequestId())
 				.field("transaction", metrics.getTransactionId())
 				.field("uri", metrics.getRequestUri())
@@ -100,6 +105,7 @@ public abstract class AbstractElasticReportEngine implements ReportEngine {
 	protected XContentBuilder getSource(HealthStatus healthStatus) throws IOException {
 		return XContentFactory.jsonBuilder()
 				.startObject()
+				.field(Fields.GATEWAY, node.id())
 				.field("api", healthStatus.getApi())
 				.field("status", healthStatus.getStatus())
 				.field("url", healthStatus.getUrl())
@@ -223,7 +229,7 @@ public abstract class AbstractElasticReportEngine implements ReportEngine {
 			builder.endObject();
 		}
 
-		builder.field(Fields.GATEWAY, monitor.gateway())
+		builder.field(Fields.GATEWAY, node.id())
 				.field(Fields.HOSTNAME, hostname)
 				.field(Fields.SPECIAL_TIMESTAMP, Date.from(monitor.timestamp()), dtf)
 				.endObject();
