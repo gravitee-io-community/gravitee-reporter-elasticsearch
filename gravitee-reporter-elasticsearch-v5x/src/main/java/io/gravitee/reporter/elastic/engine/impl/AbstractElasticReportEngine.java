@@ -97,6 +97,7 @@ public abstract class AbstractElasticReportEngine implements ReportEngine {
 				.field("client-response-headers", metrics.getClientResponseHeaders())
 				.field("proxy-request-headers", metrics.getProxyRequestHeaders())
 				.field("proxy-response-headers", metrics.getProxyResponseHeaders())
+				.field("message", metrics.getMessage())
 				.field(Fields.HOSTNAME, hostname)
 				.field(Fields.SPECIAL_TIMESTAMP, Date.from(metrics.timestamp()), dtf)
 				.endObject();
