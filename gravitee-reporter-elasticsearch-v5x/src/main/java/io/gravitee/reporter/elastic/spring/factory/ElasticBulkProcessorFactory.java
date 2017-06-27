@@ -165,6 +165,7 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
                     .startObject("client-response-headers").field(FIELD_TYPE, FIELD_TYPE_OBJECT).field("enabled", false).endObject()
                     .startObject("proxy-request-headers").field(FIELD_TYPE, FIELD_TYPE_OBJECT).field("enabled", false).endObject()
                     .startObject("proxy-response-headers").field(FIELD_TYPE, FIELD_TYPE_OBJECT).field("enabled", false).endObject()
+                    .startObject("message").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                     .endObject()
                     .endObject()
                     .endObject()
