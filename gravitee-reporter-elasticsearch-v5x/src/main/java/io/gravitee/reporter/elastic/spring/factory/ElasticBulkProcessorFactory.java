@@ -35,7 +35,7 @@ import java.io.IOException;
 import java.util.stream.Stream;
 
 /**
- * @author David BRASSELY (brasseld at gmail.com)
+ * @author David BRASSELY (david.brassely at graviteesource.com)
  * @author GraviteeSource Team
  */
 public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcessor> {
@@ -43,13 +43,13 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
     private final Logger LOGGER = LoggerFactory.getLogger(ElasticBulkProcessorFactory.class);
 
     private final static String FIELD_TYPE = "type";
-    private final static String FIELD_TYPE_STRING = "string";
+    private final static String FIELD_TYPE_KEYWORD = "keyword";
     private final static String FIELD_TYPE_SHORT = "short";
     private final static String FIELD_TYPE_INTEGER = "integer";
     private final static String FIELD_TYPE_BOOLEAN = "boolean";
     private final static String FIELD_TYPE_OBJECT = "object";
     private final static String FIELD_INDEX = "index";
-    private final static String FIELD_INDEX_NOT_ANALYZED = "not_analyzed";
+    private final static String FIELD_INDEX_NOT_ANALYZED = "false";
 
     @Autowired
     private Client client;
@@ -138,23 +138,23 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
                     .startObject()
                     .startObject(typeName)
                     .startObject("properties")
-                    .startObject("gateway").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                    .startObject("id").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                    .startObject("transaction").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                    .startObject("api").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                    .startObject("application").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                    .startObject("subscription").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                    .startObject("plan").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                    .startObject("api-key").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                    .startObject("user").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                    .startObject("hostname").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                    .startObject("uri").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                    .startObject("path").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                    .startObject("endpoint").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                    .startObject("local-address").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                    .startObject("remote-address").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                    .startObject("method").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                    .startObject("tenant").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                    .startObject("gateway").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                    .startObject("id").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                    .startObject("transaction").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                    .startObject("api").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                    .startObject("application").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                    .startObject("subscription").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                    .startObject("plan").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                    .startObject("api-key").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                    .startObject("user").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                    .startObject("hostname").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                    .startObject("uri").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                    .startObject("path").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                    .startObject("endpoint").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                    .startObject("local-address").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                    .startObject("remote-address").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                    .startObject("method").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                    .startObject("tenant").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                     .startObject("status").field(FIELD_TYPE, FIELD_TYPE_SHORT).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                     .startObject("response-time").field(FIELD_TYPE, FIELD_TYPE_INTEGER).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                     .startObject("api-response-time").field(FIELD_TYPE, FIELD_TYPE_INTEGER).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
@@ -165,7 +165,7 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
                     .startObject("client-response-headers").field(FIELD_TYPE, FIELD_TYPE_OBJECT).field("enabled", false).endObject()
                     .startObject("proxy-request-headers").field(FIELD_TYPE, FIELD_TYPE_OBJECT).field("enabled", false).endObject()
                     .startObject("proxy-response-headers").field(FIELD_TYPE, FIELD_TYPE_OBJECT).field("enabled", false).endObject()
-                    .startObject("message").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                    .startObject("message").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                     .endObject()
                     .endObject()
                     .endObject()
@@ -184,15 +184,15 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
                             .startObject()
                             .startObject(typeName)
                             .startObject("properties")
-                            .startObject("gateway").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                            .startObject("api").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                            .startObject("hostname").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                            .startObject("status").field(FIELD_TYPE, FIELD_TYPE_SHORT).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                            .startObject("state").field(FIELD_TYPE, FIELD_TYPE_INTEGER).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                            .startObject("gateway").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                            .startObject("id").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                            .startObject("api").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                            .startObject("endpoint").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                            .startObject("available").field(FIELD_TYPE, FIELD_TYPE_BOOLEAN).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                            .startObject("response-time").field(FIELD_TYPE, FIELD_TYPE_INTEGER).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                             .startObject("success").field(FIELD_TYPE, FIELD_TYPE_BOOLEAN).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                            .startObject("message").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                            .startObject("url").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                            .startObject("method").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                            .startObject("state").field(FIELD_TYPE, FIELD_TYPE_INTEGER).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                            .startObject("steps").field(FIELD_TYPE, FIELD_TYPE_OBJECT).field("enabled", false).endObject()
                             .endObject()
                             .endObject()
                             .endObject()
@@ -211,8 +211,8 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
                             .startObject()
                             .startObject(typeName)
                             .startObject("properties")
-                            .startObject("gateway").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                            .startObject("hostname").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                            .startObject("gateway").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                            .startObject("hostname").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                             .endObject()
                             .endObject()
                             .endObject()
