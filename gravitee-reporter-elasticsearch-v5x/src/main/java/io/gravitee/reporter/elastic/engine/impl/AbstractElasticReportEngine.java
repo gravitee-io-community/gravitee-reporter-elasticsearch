@@ -17,7 +17,8 @@ package io.gravitee.reporter.elastic.engine.impl;
 
 import io.gravitee.common.node.Node;
 import io.gravitee.reporter.api.Reportable;
-import io.gravitee.reporter.api.health.HealthStatus;
+import io.gravitee.reporter.api.health.EndpointHealthStatus;
+import io.gravitee.reporter.api.health.StepResult;
 import io.gravitee.reporter.api.http.RequestMetrics;
 import io.gravitee.reporter.api.monitor.JvmInfo;
 import io.gravitee.reporter.api.monitor.Monitor;
@@ -103,19 +104,35 @@ public abstract class AbstractElasticReportEngine implements ReportEngine {
 				.endObject();
 	}
 
-	protected XContentBuilder getSource(HealthStatus healthStatus) throws IOException {
-		return XContentFactory.jsonBuilder()
+	protected XContentBuilder getSource(EndpointHealthStatus endpointHealthStatus) throws IOException {
+		XContentBuilder builder = XContentFactory.jsonBuilder()
 				.startObject()
 				.field(Fields.GATEWAY, node.id())
-				.field("api", healthStatus.getApi())
-				.field("status", healthStatus.getStatus())
-				.field("url", healthStatus.getUrl())
-				.field("method", healthStatus.getMethod())
-				.field("success", healthStatus.isSuccess())
-				.field("state", healthStatus.getState())
-				.field("message", healthStatus.getMessage())
-				.field(Fields.HOSTNAME, hostname)
-				.field(Fields.SPECIAL_TIMESTAMP, Date.from(healthStatus.timestamp()), dtf)
+				.field("id", endpointHealthStatus.getId())
+				.field("api", endpointHealthStatus.getApi())
+				.field("endpoint", endpointHealthStatus.getEndpoint())
+				.field("response-time", endpointHealthStatus.getResponseTime())
+				.field("available", endpointHealthStatus.isAvailable())
+				.field("success", endpointHealthStatus.isSuccess())
+				.field("state", endpointHealthStatus.getState());
+
+		// Add steps result
+		builder.startArray("steps");
+		for (StepResult stepResult : endpointHealthStatus.getSteps()) {
+			builder.startObject()
+					.field("name", stepResult.getStep())
+					.field("success", stepResult.isSuccess())
+					.field("url", stepResult.getUrl())
+					.field("method", stepResult.getMethod().toString())
+					.field("status", stepResult.getStatus())
+					.field("response-time", stepResult.getResponseTime())
+					.field("message", stepResult.getMessage())
+					.endObject();
+		}
+		builder.endArray();
+
+		return builder
+				.field(Fields.SPECIAL_TIMESTAMP, Date.from(endpointHealthStatus.timestamp()), dtf)
 				.endObject();
 	}
 
