@@ -63,14 +63,14 @@ public final class ElasticReportEngine extends AbstractElasticReportEngine {
 
 			if (reportable instanceof Metrics) {
 				Metrics metrics = (Metrics) reportable;
-				bulkProcessor.add(new IndexRequest(indexName, TYPE_REQUEST)
+				bulkProcessor.add(new IndexRequest(indexName, TYPE_REQUEST, metrics.getRequestId())
 						.source(getSource((Metrics) reportable)));
 				if (metrics.getLog() != null) {
-					bulkProcessor.add(new IndexRequest(indexName, TYPE_LOG)
+					bulkProcessor.add(new IndexRequest(indexName, TYPE_LOG, metrics.getRequestId())
 							.source(getSource(metrics.getLog())));
 				}
 			} else if (reportable instanceof EndpointStatus) {
-				bulkProcessor.add(new IndexRequest(indexName, TYPE_HEALTH)
+				bulkProcessor.add(new IndexRequest(indexName, TYPE_HEALTH, ((EndpointStatus)reportable).getId())
 						.source(getSource((EndpointStatus) reportable)));
 			} else if (reportable instanceof Monitor) {
 				bulkProcessor.add(new IndexRequest(indexName, TYPE_MONITOR)

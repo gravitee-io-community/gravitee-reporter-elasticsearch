@@ -76,7 +76,6 @@ public abstract class AbstractElasticReportEngine implements ReportEngine {
 				.startObject()
 				.field(Fields.GATEWAY, node.id())
 				.field(Fields.SPECIAL_TIMESTAMP, Date.from(metrics.timestamp()), dtf)
-				.field("id", metrics.getRequestId())
 				.field("transaction", metrics.getTransactionId())
 				.field("method", metrics.getHttpMethod().code())
 				.field("uri", metrics.getUri())
@@ -106,9 +105,7 @@ public abstract class AbstractElasticReportEngine implements ReportEngine {
 	}
 
 	XContentBuilder getSource(Log log) throws IOException {
-		XContentBuilder builder = XContentFactory.jsonBuilder()
-				.startObject()
-				.field("id", log.getRequestId());
+		XContentBuilder builder = XContentFactory.jsonBuilder().startObject();
 
 		if (log.getClientRequest() != null) {
 			builder.startObject("client-request")
@@ -153,7 +150,6 @@ public abstract class AbstractElasticReportEngine implements ReportEngine {
 		XContentBuilder builder = XContentFactory.jsonBuilder()
 				.startObject()
 				.field(Fields.GATEWAY, node.id())
-				.field("id", endpointStatus.getId())
 				.field("api", endpointStatus.getApi())
 				.field("endpoint", endpointStatus.getEndpoint())
 				.field("available", endpointStatus.isAvailable())
