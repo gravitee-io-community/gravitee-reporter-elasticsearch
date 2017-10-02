@@ -17,8 +17,8 @@ package io.gravitee.reporter.elastic.engine.impl;
 
 import io.gravitee.common.node.Node;
 import io.gravitee.reporter.api.Reportable;
-import io.gravitee.reporter.api.health.EndpointHealthStatus;
-import io.gravitee.reporter.api.health.StepResult;
+import io.gravitee.reporter.api.health.EndpointStatus;
+import io.gravitee.reporter.api.health.Step;
 import io.gravitee.reporter.api.http.RequestMetrics;
 import io.gravitee.reporter.api.monitor.JvmInfo;
 import io.gravitee.reporter.api.monitor.Monitor;
@@ -136,35 +136,43 @@ public abstract class AbstractElasticReportEngine implements ReportEngine {
 		return builder.endObject();
 	}
 
-	protected XContentBuilder getSource(EndpointHealthStatus endpointHealthStatus) throws IOException {
+	protected XContentBuilder getSource(EndpointStatus endpointStatus) throws IOException {
 		XContentBuilder builder = XContentFactory.jsonBuilder()
 				.startObject()
 				.field(Fields.GATEWAY, node.id())
-				.field("id", endpointHealthStatus.getId())
-				.field("api", endpointHealthStatus.getApi())
-				.field("endpoint", endpointHealthStatus.getEndpoint())
-				.field("available", endpointHealthStatus.isAvailable())
-				.field("response-time", endpointHealthStatus.getResponseTime())
-				.field("success", endpointHealthStatus.isSuccess())
-				.field("state", endpointHealthStatus.getState());
+				.field("id", endpointStatus.getId())
+				.field("api", endpointStatus.getApi())
+				.field("endpoint", endpointStatus.getEndpoint())
+				.field("available", endpointStatus.isAvailable())
+				.field("response-time", endpointStatus.getResponseTime())
+				.field("success", endpointStatus.isSuccess())
+				.field("state", endpointStatus.getState());
 
 		// Add steps result
 		builder.startArray("steps");
-		for (StepResult stepResult : endpointHealthStatus.getSteps()) {
+		for (Step step : endpointStatus.getSteps()) {
 			builder.startObject()
-					.field("name", stepResult.getStep())
-					.field("success", stepResult.isSuccess())
-					.field("url", stepResult.getUrl())
-					.field("method", stepResult.getMethod().toString())
-					.field("status", stepResult.getStatus())
-					.field("response-time", stepResult.getResponseTime())
-					.field("message", stepResult.getMessage())
+					.field("name", step.getName())
+					.field("success", step.isSuccess())
+					.startObject("request")
+						.field("method", step.getRequest().getMethod())
+						.field("uri", step.getRequest().getUri())
+						.field("headers", step.getRequest().getHeaders())
+						.field("body", step.getRequest().getBody())
+					.endObject()
+					.startObject("response")
+						.field("status", step.getResponse().getStatus())
+						.field("headers", step.getResponse().getHeaders())
+						.field("body", step.getResponse().getBody())
+					.endObject()
+					.field("response-time", step.getResponseTime())
+					.field("message", step.getMessage())
 					.endObject();
 		}
 		builder.endArray();
 
 		return builder
-				.field(Fields.SPECIAL_TIMESTAMP, Date.from(endpointHealthStatus.timestamp()), dtf)
+				.field(Fields.SPECIAL_TIMESTAMP, Date.from(endpointStatus.timestamp()), dtf)
 				.endObject();
 	}
 
