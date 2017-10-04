@@ -16,7 +16,6 @@
 package io.gravitee.reporter.elastic.spring.factory;
 
 import io.gravitee.reporter.elastic.config.ElasticConfiguration;
-import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.ResourceAlreadyExistsException;
 import org.elasticsearch.action.IndicesRequest;
 import org.elasticsearch.action.bulk.BulkProcessor;
@@ -25,6 +24,7 @@ import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.unit.ByteSizeValue;
 import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +50,10 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
     private final static String FIELD_TYPE_OBJECT = "object";
     private final static String FIELD_INDEX = "index";
     private final static String FIELD_INDEX_NOT_ANALYZED = "false";
+
+    private final static String TYPE_REQUEST = "request";
+    private final static String TYPE_HEALTH = "health";
+    private final static String TYPE_MONITOR = "monitor";
 
     @Autowired
     private Client client;
@@ -93,18 +97,10 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
 
     private void initializeIndices(BulkRequest request) {
         try {
-            String[] indicesToCreate = request.subRequests().stream()
+            request.subRequests().stream()
                     .map(IndicesRequest::indices)
                     .flatMap(Stream::of)
-                    .distinct()
-                    .filter(this::create)
-                    .toArray(String[]::new);
-
-            if (indicesToCreate.length > 0) {
-                createRequestMapping(indicesToCreate);
-                createHealthMapping(indicesToCreate);
-                createMonitorMapping(indicesToCreate);
-            }
+                    .forEach(this::create);
         } catch (Exception ex) {
             LOGGER.error("An error occurs while creating indices", ex);
         }
@@ -119,7 +115,11 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
     private boolean create(String indexName) {
         try {
             LOGGER.debug("Looking for index [{}]", indexName);
-            client.admin().indices().prepareCreate(indexName).execute().actionGet();
+            client.admin().indices().prepareCreate(indexName)
+                    .addMapping(TYPE_REQUEST, createRequestMapping())
+                    .addMapping(TYPE_HEALTH, createHealthMapping())
+                    .addMapping(TYPE_MONITOR, createMonitorMapping())
+                    .execute().actionGet();
             return true;
         } catch (ResourceAlreadyExistsException raee) {
             return false;
@@ -129,14 +129,10 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
         return false;
     }
 
-    private void createRequestMapping(String[] indicesToCreate) {
-        String typeName = "request";
-
-        try {
-            createMapping(indicesToCreate, typeName,
-                    XContentFactory.jsonBuilder()
+    private XContentBuilder createRequestMapping() throws IOException {
+        return XContentFactory.jsonBuilder()
                     .startObject()
-                    .startObject(typeName)
+                    .startObject(TYPE_REQUEST)
                     .startObject("properties")
                     .startObject("gateway").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).endObject()
                     .startObject("id").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).endObject()
@@ -168,21 +164,13 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
                     .startObject("message").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                     .endObject()
                     .endObject()
-                    .endObject()
-                    .string());
-        } catch (IOException ex) {
-            LOGGER.error("Error creating indices mapping [{}]", indicesToCreate, ex);
-        }
+                    .endObject();
     }
 
-    private void createHealthMapping(String[] indicesToCreate) {
-        String typeName = "health";
-
-        try {
-            createMapping(indicesToCreate, typeName,
-                    XContentFactory.jsonBuilder()
+    private XContentBuilder createHealthMapping() throws IOException {
+        return XContentFactory.jsonBuilder()
                             .startObject()
-                            .startObject(typeName)
+                            .startObject(TYPE_HEALTH)
                             .startObject("properties")
                             .startObject("gateway").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).endObject()
                             .startObject("id").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).endObject()
@@ -195,40 +183,18 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
                             .startObject("steps").field(FIELD_TYPE, FIELD_TYPE_OBJECT).field("enabled", false).endObject()
                             .endObject()
                             .endObject()
-                            .endObject()
-                            .string());
-        } catch (IOException ex) {
-            LOGGER.error("Error creating indices mapping [{}]", indicesToCreate, ex);
-        }
+                            .endObject();
     }
 
-    private void createMonitorMapping(String[] indicesToCreate) {
-        String typeName = "monitor";
-
-        try {
-            createMapping(indicesToCreate, typeName,
-                    XContentFactory.jsonBuilder()
+    private XContentBuilder createMonitorMapping() throws IOException {
+        return XContentFactory.jsonBuilder()
                             .startObject()
-                            .startObject(typeName)
+                            .startObject(TYPE_MONITOR)
                             .startObject("properties")
                             .startObject("gateway").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).endObject()
                             .startObject("hostname").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).endObject()
                             .endObject()
                             .endObject()
-                            .endObject()
-                            .string());
-        } catch (IOException ex) {
-            LOGGER.error("Error creating indices mapping [{}]", indicesToCreate, ex);
-        }
-    }
-
-    private void createMapping(String[] indices, String type, String mapping) {
-        try {
-            LOGGER.debug("Applying mapping for [{}]/[{}]: {}", indices, type, mapping);
-            client.admin().indices().preparePutMapping(indices)
-                    .setType(type).setSource(mapping).execute().actionGet();
-        } catch (ElasticsearchException eex) {
-            LOGGER.error("Error creating indices mapping [{}]", indices, eex);
-        }
+                            .endObject();
     }
 }
