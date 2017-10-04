@@ -45,6 +45,10 @@ public final class ElasticReportEngine extends AbstractElasticReportEngine {
 
 	private final Logger LOGGER = LoggerFactory.getLogger(ElasticReportEngine.class);
 
+	public final static String TYPE_REQUEST = "request";
+	public final static String TYPE_HEALTH = "health";
+	public final static String TYPE_MONITOR = "monitor";
+
 	@Autowired
 	private BulkProcessor bulkProcessor;
 
@@ -57,13 +61,13 @@ public final class ElasticReportEngine extends AbstractElasticReportEngine {
 			String indexName = getIndexName(reportable);
 
 			if (reportable instanceof RequestMetrics) {
-				bulkProcessor.add(new IndexRequest(indexName, "request")
+				bulkProcessor.add(new IndexRequest(indexName, TYPE_REQUEST)
 						.source(getSource((RequestMetrics) reportable)));
 			} else if (reportable instanceof EndpointHealthStatus) {
-				bulkProcessor.add(new IndexRequest(indexName, "health")
+				bulkProcessor.add(new IndexRequest(indexName, TYPE_HEALTH)
 						.source(getSource((EndpointHealthStatus) reportable)));
 			} else if (reportable instanceof Monitor) {
-				bulkProcessor.add(new IndexRequest(indexName, "monitor")
+				bulkProcessor.add(new IndexRequest(indexName, TYPE_MONITOR)
 						.source(getSource((Monitor) reportable)));
 			}
 		} catch (IOException e) {
