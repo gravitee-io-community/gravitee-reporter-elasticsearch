@@ -16,6 +16,7 @@
 package io.gravitee.reporter.elastic.spring.factory;
 
 import io.gravitee.reporter.elastic.config.ElasticConfiguration;
+import io.gravitee.reporter.elastic.engine.impl.ElasticReportEngine;
 import org.elasticsearch.action.IndicesRequest;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
@@ -31,11 +32,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
 
 import java.io.IOException;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 /**
- * @author David BRASSELY (brasseld at gmail.com)
+ * @author David BRASSELY (david.brassely at graviteesource.com)
  * @author GraviteeSource Team
  */
 public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcessor> {
@@ -49,11 +49,8 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
     private final static String FIELD_TYPE_BOOLEAN = "boolean";
     private final static String FIELD_TYPE_OBJECT = "object";
     private final static String FIELD_INDEX = "index";
+    private final static String FIELD_ENABLED = "enabled";
     private final static String FIELD_INDEX_NOT_ANALYZED = "not_analyzed";
-
-    private final static String TYPE_REQUEST = "request";
-    private final static String TYPE_HEALTH = "health";
-    private final static String TYPE_MONITOR = "monitor";
 
     @Autowired
     private Client client;
@@ -116,9 +113,9 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
         try {
             LOGGER.debug("Looking for index [{}]", indexName);
             client.admin().indices().prepareCreate(indexName)
-                    .addMapping(TYPE_REQUEST, createRequestMapping())
-                    .addMapping(TYPE_HEALTH, createHealthMapping())
-                    .addMapping(TYPE_MONITOR, createMonitorMapping())
+                    .addMapping(ElasticReportEngine.TYPE_REQUEST, createRequestMapping())
+                    .addMapping(ElasticReportEngine.TYPE_HEALTH, createHealthMapping())
+                    .addMapping(ElasticReportEngine.TYPE_MONITOR, createMonitorMapping())
                     .execute().actionGet();
             return true;
         } catch (org.elasticsearch.indices.IndexAlreadyExistsException iaee) {
@@ -132,7 +129,7 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
     private XContentBuilder createRequestMapping() throws IOException {
         return XContentFactory.jsonBuilder()
                     .startObject()
-                    .startObject(TYPE_REQUEST)
+                    .startObject(ElasticReportEngine.TYPE_REQUEST)
                             .startObject("properties")
                             .startObject("gateway").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                             .startObject("id").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
@@ -157,10 +154,10 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
                             .startObject("proxy-latency").field(FIELD_TYPE, FIELD_TYPE_INTEGER).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                             .startObject("request-content-length").field(FIELD_TYPE, FIELD_TYPE_INTEGER).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                             .startObject("response-content-length").field(FIELD_TYPE, FIELD_TYPE_INTEGER).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                            .startObject("client-request-headers").field(FIELD_TYPE, FIELD_TYPE_OBJECT).field("enabled", false).endObject()
-                            .startObject("client-response-headers").field(FIELD_TYPE, FIELD_TYPE_OBJECT).field("enabled", false).endObject()
-                            .startObject("proxy-request-headers").field(FIELD_TYPE, FIELD_TYPE_OBJECT).field("enabled", false).endObject()
-                            .startObject("proxy-response-headers").field(FIELD_TYPE, FIELD_TYPE_OBJECT).field("enabled", false).endObject()
+                            .startObject("client-request").field(FIELD_TYPE, FIELD_TYPE_OBJECT).field(FIELD_ENABLED, false).endObject()
+                            .startObject("client-response").field(FIELD_TYPE, FIELD_TYPE_OBJECT).field(FIELD_ENABLED, false).endObject()
+                            .startObject("proxy-request").field(FIELD_TYPE, FIELD_TYPE_OBJECT).field(FIELD_ENABLED, false).endObject()
+                            .startObject("proxy-response").field(FIELD_TYPE, FIELD_TYPE_OBJECT).field(FIELD_ENABLED, false).endObject()
                             .startObject("message").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                     .endObject()
                     .endObject()
@@ -170,7 +167,7 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
     private XContentBuilder createHealthMapping() throws IOException {
         return XContentFactory.jsonBuilder()
                             .startObject()
-                            .startObject(TYPE_HEALTH)
+                            .startObject(ElasticReportEngine.TYPE_HEALTH)
                             .startObject("properties")
                             .startObject("gateway").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                             .startObject("id").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
@@ -180,7 +177,7 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
                             .startObject("response-time").field(FIELD_TYPE, FIELD_TYPE_INTEGER).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                             .startObject("success").field(FIELD_TYPE, FIELD_TYPE_BOOLEAN).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                             .startObject("state").field(FIELD_TYPE, FIELD_TYPE_INTEGER).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                            .startObject("steps").field(FIELD_TYPE, FIELD_TYPE_OBJECT).field("enabled", false).endObject()
+                            .startObject("steps").field(FIELD_TYPE, FIELD_TYPE_OBJECT).field(FIELD_ENABLED, false).endObject()
                             .endObject()
                             .endObject()
                             .endObject();
@@ -189,7 +186,7 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
     private XContentBuilder createMonitorMapping() throws IOException {
         return XContentFactory.jsonBuilder()
                             .startObject()
-                            .startObject(TYPE_MONITOR)
+                            .startObject(ElasticReportEngine.TYPE_MONITOR)
                             .startObject("properties")
                             .startObject("gateway").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                             .startObject("hostname").field(FIELD_TYPE, FIELD_TYPE_STRING).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()

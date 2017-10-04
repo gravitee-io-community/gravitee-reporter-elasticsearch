@@ -62,7 +62,6 @@ public abstract class AbstractElasticReportEngine implements ReportEngine {
 		} catch (UnknownHostException e) {
 			hostname = "unknown";
 		}
-
 	}
 
 	public AbstractElasticReportEngine() {
@@ -71,7 +70,7 @@ public abstract class AbstractElasticReportEngine implements ReportEngine {
 	}
 
 	protected XContentBuilder getSource(RequestMetrics metrics) throws IOException {
-		return XContentFactory.jsonBuilder()
+		XContentBuilder builder = XContentFactory.jsonBuilder()
 				.startObject()
 				.field(Fields.GATEWAY, node.id())
 				.field("id", metrics.getRequestId())
@@ -94,14 +93,45 @@ public abstract class AbstractElasticReportEngine implements ReportEngine {
 				.field("remote-address", metrics.getRequestRemoteAddress())
 				.field("endpoint", metrics.getEndpoint())
 				.field("tenant", metrics.getTenant())
-				.field("client-request-headers", metrics.getClientRequestHeaders())
-				.field("client-response-headers", metrics.getClientResponseHeaders())
-				.field("proxy-request-headers", metrics.getProxyRequestHeaders())
-				.field("proxy-response-headers", metrics.getProxyResponseHeaders())
 				.field("message", metrics.getMessage())
 				.field(Fields.HOSTNAME, hostname)
-				.field(Fields.SPECIAL_TIMESTAMP, Date.from(metrics.timestamp()), dtf)
-				.endObject();
+				.field(Fields.SPECIAL_TIMESTAMP, Date.from(metrics.timestamp()), dtf);
+
+		if (metrics.getClientRequest() != null) {
+			builder.startObject("client-request")
+					.field("method", metrics.getClientRequest().getMethod())
+					.field("uri", metrics.getClientRequest().getUri())
+					.field("headers", metrics.getClientRequest().getHeaders())
+					.field("body", metrics.getClientRequest().getBody())
+					.endObject();
+		}
+
+		if (metrics.getProxyRequest() != null) {
+			builder.startObject("proxy-request")
+					.field("method", metrics.getProxyRequest().getMethod())
+					.field("uri", metrics.getProxyRequest().getUri())
+					.field("headers", metrics.getProxyRequest().getHeaders())
+					.field("body", metrics.getProxyRequest().getBody())
+					.endObject();
+		}
+
+		if (metrics.getClientResponse() != null) {
+			builder.startObject("client-response")
+					.field("status", metrics.getClientResponse().getStatus())
+					.field("headers", metrics.getClientResponse().getHeaders())
+					.field("body", metrics.getClientResponse().getBody())
+					.endObject();
+		}
+
+		if (metrics.getProxyResponse() != null) {
+			builder.startObject("proxy-response")
+					.field("status", metrics.getProxyResponse().getStatus())
+					.field("headers", metrics.getProxyResponse().getHeaders())
+					.field("body", metrics.getProxyResponse().getBody())
+					.endObject();
+		}
+
+		return builder.endObject();
 	}
 
 	protected XContentBuilder getSource(EndpointHealthStatus endpointHealthStatus) throws IOException {
