@@ -17,7 +17,7 @@ package io.gravitee.reporter.elastic.engine.impl;
 
 import io.gravitee.reporter.api.Reportable;
 import io.gravitee.reporter.api.health.EndpointStatus;
-import io.gravitee.reporter.api.http.RequestMetrics;
+import io.gravitee.reporter.api.http.Metrics;
 import io.gravitee.reporter.api.monitor.Monitor;
 import io.gravitee.reporter.elastic.model.Protocol;
 import org.elasticsearch.action.bulk.BulkProcessor;
@@ -48,6 +48,7 @@ public final class ElasticReportEngine extends AbstractElasticReportEngine {
 	public final static String TYPE_REQUEST = "request";
 	public final static String TYPE_HEALTH = "health";
 	public final static String TYPE_MONITOR = "monitor";
+	public final static String TYPE_LOG = "log";
 
 	@Autowired
 	private BulkProcessor bulkProcessor;
@@ -60,9 +61,14 @@ public final class ElasticReportEngine extends AbstractElasticReportEngine {
 		try {
 			String indexName = getIndexName(reportable);
 
-			if (reportable instanceof RequestMetrics) {
+			if (reportable instanceof Metrics) {
+				Metrics metrics = (Metrics) reportable;
 				bulkProcessor.add(new IndexRequest(indexName, TYPE_REQUEST)
-						.source(getSource((RequestMetrics) reportable)));
+						.source(getSource((Metrics) reportable)));
+				if (metrics.getLog() != null) {
+					bulkProcessor.add(new IndexRequest(indexName, TYPE_LOG)
+							.source(getSource(metrics.getLog())));
+				}
 			} else if (reportable instanceof EndpointStatus) {
 				bulkProcessor.add(new IndexRequest(indexName, TYPE_HEALTH)
 						.source(getSource((EndpointStatus) reportable)));
@@ -70,11 +76,11 @@ public final class ElasticReportEngine extends AbstractElasticReportEngine {
 				bulkProcessor.add(new IndexRequest(indexName, TYPE_MONITOR)
 						.source(getSource((Monitor) reportable)));
 			}
-		} catch (IOException e) {
-			LOGGER.error("Request {} report failed", reportable, e);
+		} catch (IOException ioe) {
+			LOGGER.error("Unexpected error while indexing into ES", ioe);
 		}
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */

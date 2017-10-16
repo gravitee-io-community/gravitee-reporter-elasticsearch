@@ -117,6 +117,7 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
                     .addMapping(ElasticReportEngine.TYPE_REQUEST, createRequestMapping())
                     .addMapping(ElasticReportEngine.TYPE_HEALTH, createHealthMapping())
                     .addMapping(ElasticReportEngine.TYPE_MONITOR, createMonitorMapping())
+                    .addMapping(ElasticReportEngine.TYPE_LOG, createLogMapping())
                     .execute().actionGet();
             return true;
         } catch (ResourceAlreadyExistsException raee) {
@@ -137,17 +138,14 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
                     .startObject("transaction").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).endObject()
                     .startObject("api").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).endObject()
                     .startObject("application").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).endObject()
-                    .startObject("subscription").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                     .startObject("plan").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).endObject()
                     .startObject("api-key").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                    .startObject("user").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                    .startObject("hostname").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).endObject()
                     .startObject("uri").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                     .startObject("path").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                     .startObject("endpoint").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).endObject()
                     .startObject("local-address").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                     .startObject("remote-address").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                    .startObject("method").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).endObject()
+                    .startObject("method").field(FIELD_TYPE, FIELD_TYPE_SHORT).endObject()
                     .startObject("tenant").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).endObject()
                     .startObject("status").field(FIELD_TYPE, FIELD_TYPE_SHORT).endObject()
                     .startObject("response-time").field(FIELD_TYPE, FIELD_TYPE_INTEGER).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
@@ -155,10 +153,6 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
                     .startObject("proxy-latency").field(FIELD_TYPE, FIELD_TYPE_INTEGER).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                     .startObject("request-content-length").field(FIELD_TYPE, FIELD_TYPE_INTEGER).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                     .startObject("response-content-length").field(FIELD_TYPE, FIELD_TYPE_INTEGER).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                    .startObject("client-request").field(FIELD_TYPE, FIELD_TYPE_OBJECT).field(FIELD_ENABLED, false).endObject()
-                    .startObject("client-response").field(FIELD_TYPE, FIELD_TYPE_OBJECT).field(FIELD_ENABLED, false).endObject()
-                    .startObject("proxy-request").field(FIELD_TYPE, FIELD_TYPE_OBJECT).field(FIELD_ENABLED, false).endObject()
-                    .startObject("proxy-response").field(FIELD_TYPE, FIELD_TYPE_OBJECT).field(FIELD_ENABLED, false).endObject()
                     .startObject("message").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                     .endObject()
                     .endObject()
@@ -194,5 +188,20 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
                             .endObject()
                             .endObject()
                             .endObject();
+    }
+
+    private XContentBuilder createLogMapping() throws IOException {
+        return XContentFactory.jsonBuilder()
+                .startObject()
+                .startObject(ElasticReportEngine.TYPE_LOG)
+                .startObject("properties")
+                .startObject("id").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).endObject()
+                .startObject("client-request").field(FIELD_TYPE, FIELD_TYPE_OBJECT).field(FIELD_ENABLED, false).endObject()
+                .startObject("client-response").field(FIELD_TYPE, FIELD_TYPE_OBJECT).field(FIELD_ENABLED, false).endObject()
+                .startObject("proxy-request").field(FIELD_TYPE, FIELD_TYPE_OBJECT).field(FIELD_ENABLED, false).endObject()
+                .startObject("proxy-response").field(FIELD_TYPE, FIELD_TYPE_OBJECT).field(FIELD_ENABLED, false).endObject()
+                .endObject()
+                .endObject()
+                .endObject();
     }
 }

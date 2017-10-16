@@ -19,7 +19,8 @@ import io.gravitee.common.node.Node;
 import io.gravitee.reporter.api.Reportable;
 import io.gravitee.reporter.api.health.EndpointStatus;
 import io.gravitee.reporter.api.health.Step;
-import io.gravitee.reporter.api.http.RequestMetrics;
+import io.gravitee.reporter.api.http.Metrics;
+import io.gravitee.reporter.api.log.Log;
 import io.gravitee.reporter.api.monitor.JvmInfo;
 import io.gravitee.reporter.api.monitor.Monitor;
 import io.gravitee.reporter.elastic.config.ElasticConfiguration;
@@ -64,77 +65,90 @@ public abstract class AbstractElasticReportEngine implements ReportEngine {
 		}
 	}
 
-	public AbstractElasticReportEngine() {
+	AbstractElasticReportEngine() {
 		this.sdf = java.time.format.DateTimeFormatter.ofPattern("yyyy.MM.dd").withZone(ZoneId.systemDefault());
 		this.dtf = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ");
 	}
 
-	protected XContentBuilder getSource(RequestMetrics metrics) throws IOException {
+	XContentBuilder getSource(Metrics metrics) throws IOException {
 		XContentBuilder builder = XContentFactory.jsonBuilder()
 				.startObject()
 				.field(Fields.GATEWAY, node.id())
+				.field(Fields.SPECIAL_TIMESTAMP, Date.from(metrics.timestamp()), dtf)
 				.field("id", metrics.getRequestId())
 				.field("transaction", metrics.getTransactionId())
-				.field("uri", metrics.getRequestUri())
-				.field("path", metrics.getRequestPath())
-				.field("status", metrics.getResponseHttpStatus())
-				.field("method", metrics.getRequestHttpMethod().toString())
+				.field("method", metrics.getHttpMethod().code())
+				.field("uri", metrics.getUri())
+				.field("status", metrics.getStatus())
 				.field("response-time", metrics.getProxyResponseTimeMs())
 				.field("api-response-time", metrics.getApiResponseTimeMs() >= 0 ? metrics.getApiResponseTimeMs() : null)
 				.field("proxy-latency", metrics.getProxyLatencyMs() >= 0 ? metrics.getProxyLatencyMs() : null)
 				.field("request-content-length", metrics.getRequestContentLength() >= 0 ? metrics.getRequestContentLength() : null)
 				.field("response-content-length", metrics.getResponseContentLength() >= 0 ? metrics.getResponseContentLength() : null)
 				.field("api-key", metrics.getApiKey())
-				.field("user", metrics.getUserId())
 				.field("plan", metrics.getPlan())
 				.field("api", metrics.getApi())
 				.field("application", metrics.getApplication())
-				.field("local-address", metrics.getRequestLocalAddress())
-				.field("remote-address", metrics.getRequestRemoteAddress())
-				.field("endpoint", metrics.getEndpoint())
-				.field("tenant", metrics.getTenant())
-				.field("message", metrics.getMessage())
-				.field(Fields.HOSTNAME, hostname)
-				.field(Fields.SPECIAL_TIMESTAMP, Date.from(metrics.timestamp()), dtf);
+				.field("local-address", metrics.getLocalAddress())
+				.field("remote-address", metrics.getRemoteAddress())
+				.field("endpoint", metrics.getEndpoint());
 
-		if (metrics.getClientRequest() != null) {
-			builder.startObject("client-request")
-					.field("method", metrics.getClientRequest().getMethod())
-					.field("uri", metrics.getClientRequest().getUri())
-					.field("headers", metrics.getClientRequest().getHeaders())
-					.field("body", metrics.getClientRequest().getBody())
-					.endObject();
+		if (metrics.getMessage() != null) {
+			builder.field("message", metrics.getMessage());
 		}
 
-		if (metrics.getProxyRequest() != null) {
-			builder.startObject("proxy-request")
-					.field("method", metrics.getProxyRequest().getMethod())
-					.field("uri", metrics.getProxyRequest().getUri())
-					.field("headers", metrics.getProxyRequest().getHeaders())
-					.field("body", metrics.getProxyRequest().getBody())
-					.endObject();
-		}
-
-		if (metrics.getClientResponse() != null) {
-			builder.startObject("client-response")
-					.field("status", metrics.getClientResponse().getStatus())
-					.field("headers", metrics.getClientResponse().getHeaders())
-					.field("body", metrics.getClientResponse().getBody())
-					.endObject();
-		}
-
-		if (metrics.getProxyResponse() != null) {
-			builder.startObject("proxy-response")
-					.field("status", metrics.getProxyResponse().getStatus())
-					.field("headers", metrics.getProxyResponse().getHeaders())
-					.field("body", metrics.getProxyResponse().getBody())
-					.endObject();
+		if (metrics.getTenant() != null) {
+			builder.field("tenant", metrics.getTenant());
 		}
 
 		return builder.endObject();
 	}
 
-	protected XContentBuilder getSource(EndpointStatus endpointStatus) throws IOException {
+	XContentBuilder getSource(Log log) throws IOException {
+		XContentBuilder builder = XContentFactory.jsonBuilder()
+				.startObject()
+				.field("id", log.getRequestId());
+
+		if (log.getClientRequest() != null) {
+			builder.startObject("client-request")
+					.field("method", log.getClientRequest().getMethod())
+					.field("uri", log.getClientRequest().getUri())
+					.field("headers", log.getClientRequest().getHeaders())
+					.field("body", log.getClientRequest().getBody())
+					.endObject();
+		}
+
+		if (log.getProxyRequest() != null) {
+			builder.startObject("proxy-request")
+					.field("method", log.getProxyRequest().getMethod())
+					.field("uri", log.getProxyRequest().getUri())
+					.field("headers", log.getProxyRequest().getHeaders())
+					.field("body", log.getProxyRequest().getBody())
+					.endObject();
+		}
+
+		if (log.getClientResponse() != null) {
+			builder.startObject("client-response")
+					.field("status", log.getClientResponse().getStatus())
+					.field("headers", log.getClientResponse().getHeaders())
+					.field("body", log.getClientResponse().getBody())
+					.endObject();
+		}
+
+		if (log.getProxyResponse() != null) {
+			builder.startObject("proxy-response")
+					.field("status", log.getProxyResponse().getStatus())
+					.field("headers", log.getProxyResponse().getHeaders())
+					.field("body", log.getProxyResponse().getBody())
+					.endObject();
+		}
+
+		return builder
+				.field(Fields.SPECIAL_TIMESTAMP, Date.from(log.timestamp()), dtf)
+				.endObject();
+	}
+
+	XContentBuilder getSource(EndpointStatus endpointStatus) throws IOException {
 		XContentBuilder builder = XContentFactory.jsonBuilder()
 				.startObject()
 				.field(Fields.GATEWAY, node.id())
