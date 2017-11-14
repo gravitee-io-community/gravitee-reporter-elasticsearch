@@ -105,21 +105,14 @@ public final class ElasticReportEngine implements ReportEngine {
 				.just(reportable)
 				.flatMap(reportable1 -> {
                     if (reportable1 instanceof Metrics) {
-                        Metrics metrics = (Metrics) reportable1;
-
-                        if (metrics.getLog() != null) {
-                            return Observable.just(
-                                    getSource(metrics),
-                                    getSource(metrics.getLog())
-                            );
-                        } else {
-                            return Observable.just(getSource(metrics));
-                        }
+						return Observable.just(getSource((Metrics) reportable1));
                     } else if (reportable1 instanceof EndpointStatus) {
                         return Observable.just(getSource((EndpointStatus) reportable1));
                     } else if (reportable1 instanceof Monitor) {
                         return Observable.just(getSource((Monitor) reportable1));
-                    }
+                    } else if (reportable1 instanceof Log) {
+						return Observable.just(getSource((Log) reportable1));
+					}
 
                     return Observable.never();
                 })

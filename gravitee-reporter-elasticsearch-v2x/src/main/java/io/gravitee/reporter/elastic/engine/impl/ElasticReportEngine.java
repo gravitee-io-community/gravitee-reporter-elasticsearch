@@ -18,6 +18,7 @@ package io.gravitee.reporter.elastic.engine.impl;
 import io.gravitee.reporter.api.Reportable;
 import io.gravitee.reporter.api.health.EndpointStatus;
 import io.gravitee.reporter.api.http.Metrics;
+import io.gravitee.reporter.api.log.Log;
 import io.gravitee.reporter.api.monitor.Monitor;
 import io.gravitee.reporter.elastic.model.Protocol;
 import org.elasticsearch.action.bulk.BulkProcessor;
@@ -65,16 +66,16 @@ public final class ElasticReportEngine extends AbstractElasticReportEngine {
 				Metrics metrics = (Metrics) reportable;
 				bulkProcessor.add(new IndexRequest(indexName, TYPE_REQUEST, metrics.getRequestId())
 						.source(getSource((Metrics) reportable)));
-				if (metrics.getLog() != null) {
-					bulkProcessor.add(new IndexRequest(indexName, TYPE_LOG, metrics.getRequestId())
-							.source(getSource(metrics.getLog())));
-				}
 			} else if (reportable instanceof EndpointStatus) {
 				bulkProcessor.add(new IndexRequest(indexName, TYPE_HEALTH, ((EndpointStatus)reportable).getId())
 						.source(getSource((EndpointStatus) reportable)));
 			} else if (reportable instanceof Monitor) {
 				bulkProcessor.add(new IndexRequest(indexName, TYPE_MONITOR)
 						.source(getSource((Monitor) reportable)));
+			} else if (reportable instanceof Log) {
+				Log log = (Log) reportable;
+				bulkProcessor.add(new IndexRequest(indexName, TYPE_LOG, log.getRequestId())
+						.source(getSource(log)));
 			}
 		} catch (IOException ioe) {
 			LOGGER.error("Unexpected error while indexing into ES", ioe);

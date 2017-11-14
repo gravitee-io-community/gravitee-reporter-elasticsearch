@@ -242,10 +242,6 @@
 "type": "string",
 "index": "not_analyzed"
 },
-"id": {
-"type": "string",
-"index": "not_analyzed"
-},
 "local-address": {
 "type": "string",
 "index": "not_analyzed"
