@@ -172,6 +172,7 @@ public class ElasticsearchBulkIndexer {
 	private int getMajorVersion() throws ExecutionException, InterruptedException, IOException, TechnicalException {
 		Observable<VertxHttpResponse> get = Observable.unsafeCreate(subscriber -> {
 			HttpClientRequest req = httpClient.get("/");
+			addCommonHeaders(req);
 			Observable<VertxHttpResponse> responseObservable = req
 					.exceptionHandler(subscriber::onError)
 					.toObservable()
@@ -220,6 +221,7 @@ public class ElasticsearchBulkIndexer {
 		try {
 			Observable<VertxHttpResponse> get = Observable.unsafeCreate(subscriber -> {
 				HttpClientRequest req = httpClient.get(URL_STATE_CLUSTER);
+				addCommonHeaders(req);
 				Observable<VertxHttpResponse> responseObservable = req
 						.exceptionHandler(subscriber::onError)
 						.toObservable()
