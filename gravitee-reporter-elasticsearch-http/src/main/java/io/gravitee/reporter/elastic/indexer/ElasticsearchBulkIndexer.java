@@ -275,6 +275,7 @@ public class ElasticsearchBulkIndexer {
 
 			Observable<VertxHttpResponse> get = Observable.unsafeCreate(subscriber -> {
 				HttpClientRequest req = httpClient.put(templateUrl);
+				addCommonHeaders(req);
 				Observable<VertxHttpResponse> responseObservable = req
 						.exceptionHandler(subscriber::onError)
 						.toObservable()
