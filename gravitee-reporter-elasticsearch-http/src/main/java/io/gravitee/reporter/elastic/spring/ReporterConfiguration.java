@@ -20,7 +20,7 @@ import io.gravitee.reporter.elastic.engine.ReportEngine;
 import io.gravitee.reporter.elastic.engine.impl.ElasticReportEngine;
 import io.gravitee.reporter.elastic.indexer.ElasticsearchBulkIndexer;
 import io.gravitee.reporter.elastic.templating.freemarker.FreeMarkerComponent;
-import io.vertx.rxjava.core.Vertx;
+import io.vertx.reactivex.core.Vertx;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
