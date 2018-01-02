@@ -47,7 +47,7 @@
 		<!-- Vertx.io HTTP client -->
 		<dependency>
 			<groupId>io.vertx</groupId>
-			<artifactId>vertx-rx-java</artifactId>
+			<artifactId>vertx-rx-java2</artifactId>
 			<version>${vertx.version}</version>
 		</dependency>
 

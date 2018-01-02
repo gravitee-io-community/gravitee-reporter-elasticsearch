@@ -25,10 +25,10 @@ import io.gravitee.reporter.elastic.config.ElasticConfiguration;
 import io.gravitee.reporter.elastic.engine.ReportEngine;
 import io.gravitee.reporter.elastic.indexer.ElasticsearchBulkIndexer;
 import io.gravitee.reporter.elastic.templating.freemarker.FreeMarkerComponent;
+import io.reactivex.Flowable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import rx.Observable;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -101,20 +101,20 @@ public final class ElasticReportEngine implements ReportEngine {
 	 */
 	@Override
 	public void report(Reportable reportable) {
-		Observable
+		Flowable
 				.just(reportable)
 				.flatMap(reportable1 -> {
                     if (reportable1 instanceof Metrics) {
-						return Observable.just(getSource((Metrics) reportable1));
+						return Flowable.just(getSource((Metrics) reportable1));
                     } else if (reportable1 instanceof EndpointStatus) {
-                        return Observable.just(getSource((EndpointStatus) reportable1));
+                        return Flowable.just(getSource((EndpointStatus) reportable1));
                     } else if (reportable1 instanceof Monitor) {
-                        return Observable.just(getSource((Monitor) reportable1));
+                        return Flowable.just(getSource((Monitor) reportable1));
                     } else if (reportable1 instanceof Log) {
-						return Observable.just(getSource((Log) reportable1));
+						return Flowable.just(getSource((Log) reportable1));
 					}
 
-                    return Observable.never();
+                    return Flowable.never();
                 })
 				.forEach(data -> elasticsearch.index(data));
 	}

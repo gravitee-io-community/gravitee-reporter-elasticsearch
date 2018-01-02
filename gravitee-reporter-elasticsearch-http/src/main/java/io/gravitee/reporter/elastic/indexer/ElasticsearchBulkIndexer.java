@@ -24,19 +24,20 @@ import io.gravitee.reporter.elastic.config.Endpoint;
 import io.gravitee.reporter.elastic.model.elasticsearch.Health;
 import io.gravitee.reporter.elastic.model.exception.TechnicalException;
 import io.gravitee.reporter.elastic.templating.freemarker.FreeMarkerComponent;
+import io.reactivex.Single;
+import io.reactivex.SingleObserver;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Function;
+import io.reactivex.processors.PublishProcessor;
 import io.vertx.core.http.HttpClientOptions;
-import io.vertx.rxjava.core.Vertx;
-import io.vertx.rxjava.core.buffer.Buffer;
-import io.vertx.rxjava.core.http.HttpClient;
-import io.vertx.rxjava.core.http.HttpClientRequest;
-import io.vertx.rxjava.core.http.HttpClientResponse;
+import io.vertx.reactivex.core.Vertx;
+import io.vertx.reactivex.core.buffer.Buffer;
+import io.vertx.reactivex.core.http.HttpClient;
+import io.vertx.reactivex.core.http.HttpClientRequest;
+import io.vertx.reactivex.core.http.HttpClientResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import rx.Observable;
-import rx.Subscriber;
-import rx.functions.Func1;
-import rx.subjects.PublishSubject;
 
 import java.io.IOException;
 import java.net.URI;
@@ -96,7 +97,7 @@ public class ElasticsearchBulkIndexer {
 	 */
 	private ObjectMapper mapper;
 
-	private PublishSubject<String> bulkObservable = PublishSubject.create();
+	private final PublishProcessor<String> bulkProcessor = PublishProcessor.create();
 
 	/**
 	 * Authorization header if Elasticsearch is protected.
@@ -145,7 +146,7 @@ public class ElasticsearchBulkIndexer {
 
 			this.ensureTemplate();
 
-			bulkObservable
+			bulkProcessor
 					.buffer(
 							configuration.getFlushInterval(),
 							TimeUnit.SECONDS,
@@ -170,35 +171,16 @@ public class ElasticsearchBulkIndexer {
 	}
 
 	private int getMajorVersion() throws ExecutionException, InterruptedException, IOException, TechnicalException {
-		Observable<VertxHttpResponse> get = Observable.unsafeCreate(subscriber -> {
-			HttpClientRequest req = httpClient.get("/");
-			addCommonHeaders(req);
-			Observable<VertxHttpResponse> responseObservable = req
-					.exceptionHandler(subscriber::onError)
-					.toObservable()
-					.flatMap(new Func1<HttpClientResponse, Observable<VertxHttpResponse>>() {
-						@Override
-						public Observable<VertxHttpResponse> call(HttpClientResponse httpClientResponse) {
-							return Observable.unsafeCreate(subscriber1 -> httpClientResponse.bodyHandler(body -> {
-								subscriber1.onNext(new VertxHttpResponse(httpClientResponse, body));
-								subscriber1.onCompleted();
-							}));
-						}
-					});
+		HttpClientRequest req = httpClient.get("/");
+		VertxHttpResponse response = doRequest(req, null).blockingGet();
 
-			responseObservable.subscribe(subscriber);
-			req.end();
-		});
-
-		VertxHttpResponse single = get.toBlocking().single();
-
-		if (single.response.statusCode() != HttpStatusCode.OK_200) {
+		if (response.response.statusCode() != HttpStatusCode.OK_200) {
 			logger.error("Impossible to call Elasticsearch GET {}.", "/");
 			throw new TechnicalException(
-					"Impossible to call Elasticsearch. Elasticsearch response code is " + single.response.statusCode() );
+					"Impossible to call Elasticsearch. Elasticsearch response code is " + response.response.statusCode() );
 		}
 
-		String body = single.body.toString();
+		String body = response.body.toString();
 
 		String version = mapper.readTree(body).path("version").path("number").asText();
 		float result = Float.valueOf(version.substring(0, 3));
@@ -219,35 +201,16 @@ public class ElasticsearchBulkIndexer {
 	 */
 	Health getClusterHealth() throws TechnicalException {
 		try {
-			Observable<VertxHttpResponse> get = Observable.unsafeCreate(subscriber -> {
-				HttpClientRequest req = httpClient.get(URL_STATE_CLUSTER);
-				addCommonHeaders(req);
-				Observable<VertxHttpResponse> responseObservable = req
-						.exceptionHandler(subscriber::onError)
-						.toObservable()
-						.flatMap(new Func1<HttpClientResponse, Observable<VertxHttpResponse>>() {
-							@Override
-							public Observable<VertxHttpResponse> call(HttpClientResponse httpClientResponse) {
-								return Observable.unsafeCreate(subscriber1 -> httpClientResponse.bodyHandler(body -> {
-									subscriber1.onNext(new VertxHttpResponse(httpClientResponse, body));
-									subscriber1.onCompleted();
-								}));
-							}
-						});
+			HttpClientRequest req = httpClient.get(URL_STATE_CLUSTER);
+			VertxHttpResponse response = doRequest(req, null).blockingGet();
 
-				responseObservable.subscribe(subscriber);
-				req.end();
-			});
-
-			VertxHttpResponse single = get.toBlocking().single();
-
-			if (single.response.statusCode() != HttpStatusCode.OK_200) {
+			if (response.response.statusCode() != HttpStatusCode.OK_200) {
 				logger.error("Impossible to call Elasticsearch GET {}.", URL_STATE_CLUSTER);
 				throw new TechnicalException(
-						"Impossible to call Elasticsearch. Elasticsearch response code is " + single.response.statusCode() );
+						"Impossible to call Elasticsearch. Elasticsearch response code is " + response.response.statusCode() );
 			}
 
-			String body = single.body.toString();
+			String body = response.body.toString();
 			logger.debug("Response of ES for GET {} : {}", URL_STATE_CLUSTER, body);
 
 			return this.mapper.readValue(body, Health.class);
@@ -278,34 +241,15 @@ public class ElasticsearchBulkIndexer {
 
 			logger.debug("PUT template : {}", template);
 
-			Observable<VertxHttpResponse> get = Observable.unsafeCreate(subscriber -> {
-				HttpClientRequest req = httpClient.put(templateUrl);
-				addCommonHeaders(req);
-				Observable<VertxHttpResponse> responseObservable = req
-						.exceptionHandler(subscriber::onError)
-						.toObservable()
-						.flatMap(new Func1<HttpClientResponse, Observable<VertxHttpResponse>>() {
-							@Override
-							public Observable<VertxHttpResponse> call(HttpClientResponse httpClientResponse) {
-								return Observable.unsafeCreate(subscriber1 -> httpClientResponse.bodyHandler(body -> {
-									subscriber1.onNext(new VertxHttpResponse(httpClientResponse, body));
-									subscriber1.onCompleted();
-								}));
-							}
-						});
+			HttpClientRequest req = httpClient.put(templateUrl);
+			VertxHttpResponse response = doRequest(req, template).blockingGet();
 
-				responseObservable.subscribe(subscriber);
-				req.end(template);
-			});
+			String body = response.body.toString();
 
-			VertxHttpResponse single = get.toBlocking().single();
-
-			String body = single.body.toString();
-
-			if (single.response.statusCode() != HttpStatusCode.OK_200) {
+			if (response.response.statusCode() != HttpStatusCode.OK_200) {
 				logger.error("Impossible to call Elasticsearch PUT {}. Body is {}", templateUrl, body);
 				throw new TechnicalException("Impossible to call Elasticsearch PUT " + templateUrl
-						+ ". Response is " + single.response.statusCode());
+						+ ". Response is " + response.response.statusCode());
 			}
 
 			logger.debug("Response of ES for PUT {} : {}",  URL_TEMPLATE + "/gravitee", body);
@@ -316,7 +260,7 @@ public class ElasticsearchBulkIndexer {
 	}
 
 	public void index(final String data) {
-		bulkObservable.onNext(data);
+		bulkProcessor.onNext(data);
 	}
 
 	/**
@@ -326,7 +270,7 @@ public class ElasticsearchBulkIndexer {
 	 *            the list of data to bulk index
 	 */
 	private void index(final List<String> data) {
-		if (data != null && ! data.isEmpty()) {
+		if (data != null && !data.isEmpty()) {
 			try {
 				String bulk = data.stream().collect(Collectors.joining());
 
@@ -334,47 +278,60 @@ public class ElasticsearchBulkIndexer {
 
 				HttpClientRequest req = httpClient.post(URL_BULK);
 				req.putHeader(HttpHeaders.CONTENT_TYPE, "application/x-ndjson");
-				addCommonHeaders(req);
 
-				req
-						.toObservable()
-						.flatMap(new Func1<HttpClientResponse, Observable<VertxHttpResponse>>() {
+				doRequest(req, bulk)
+						.subscribe(new SingleObserver<VertxHttpResponse>() {
 							@Override
-							public Observable<VertxHttpResponse> call(HttpClientResponse httpClientResponse) {
-								return Observable.unsafeCreate(subscriber1 -> httpClientResponse.bodyHandler(body -> {
-									subscriber1.onNext(new VertxHttpResponse(httpClientResponse, body));
-									subscriber1.onCompleted();
-								}));
-							}
-						})
-						.subscribe(new Subscriber<VertxHttpResponse>() {
-							@Override
-							public void onCompleted() {
+							public void onSubscribe(Disposable disposable) {
 
 							}
 
 							@Override
-							public void onError(Throwable t) {
-								logger.error("An error occurs while calling Elasticsearch POST {}", URL_BULK, t);
-							}
-
-							@Override
-							public void onNext(VertxHttpResponse response) {
-								String body = response.body.toString();
+							public void onSuccess(VertxHttpResponse vertxHttpResponse) {
+								String body = vertxHttpResponse.body.toString();
 
 								logger.debug("Response of ES for POST {} : {}", URL_BULK, body);
 
-								if (response.response.statusCode() != HttpStatusCode.OK_200) {
+								if (vertxHttpResponse.response.statusCode() != HttpStatusCode.OK_200) {
 									logger.error("Impossible to call Elasticsearch POST {}. Body is {}", URL_BULK, body);
 								}
 							}
-						});
 
-				req.end(bulk);
+							@Override
+							public void onError(Throwable throwable) {
+								logger.error("An error occurs while calling Elasticsearch POST {}", URL_BULK, throwable);
+							}
+						});
 			} catch (Exception ex) {
 				logger.error("Unexpected error while bulk indexing data to Elasticsearch", ex);
 			}
 		}
+	}
+
+	private Single<VertxHttpResponse> doRequest(final HttpClientRequest request, final String body) {
+		addCommonHeaders(request);
+		return Single.create(singleEmitter ->
+				request
+						.exceptionHandler(singleEmitter::onError)
+						.toFlowable()
+						.doOnSubscribe(subscription -> {
+							if (body == null) {
+								request.end();
+							} else {
+								request.end(body);
+							}
+						})
+						.flatMapSingle(new Function<HttpClientResponse, Single<VertxHttpResponse>>() {
+							@Override
+							public Single<VertxHttpResponse> apply(HttpClientResponse resp) throws Exception {
+								return Single.create(sub -> {
+									resp.exceptionHandler(singleEmitter::onError);
+									resp.bodyHandler(body -> singleEmitter.onSuccess(new VertxHttpResponse(resp, body)));
+								});
+							}
+						})
+						.subscribe());
+
 	}
 
 	/**
@@ -397,7 +354,7 @@ public class ElasticsearchBulkIndexer {
 
 	class VertxHttpResponse {
 		final HttpClientResponse response;
-		final Buffer             body;
+		final Buffer body;
 		VertxHttpResponse( HttpClientResponse theResponse, Buffer theBody ) {
 			response = theResponse;
 			body = theBody;
