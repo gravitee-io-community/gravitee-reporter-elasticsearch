@@ -47,8 +47,31 @@
 "index": false
 },
 "remote-address": {
-"type": "keyword",
+"type": "ip",
 "index": false
+},
+"geoip" : {
+    "properties": {
+        "continent_name":{
+            "type": "keyword",
+            "index": true
+        },
+        "country_iso_code":{
+            "type": "keyword",
+            "index": true
+        },
+        "region_name":{
+            "type": "keyword",
+            "index": true
+        },
+        "city_name":{
+            "type": "keyword",
+            "index": true
+        },
+        "location": {
+            "type": "geo_point"
+        }
+    }
 },
 "request-content-length": {
 "type": "integer",

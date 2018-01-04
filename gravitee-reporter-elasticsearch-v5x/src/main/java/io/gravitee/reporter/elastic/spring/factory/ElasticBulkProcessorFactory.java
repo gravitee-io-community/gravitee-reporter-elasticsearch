@@ -16,6 +16,7 @@
 package io.gravitee.reporter.elastic.spring.factory;
 
 import io.gravitee.reporter.elastic.config.ElasticConfiguration;
+import io.gravitee.reporter.elastic.config.PipelineConfiguration;
 import io.gravitee.reporter.elastic.engine.impl.ElasticReportEngine;
 import org.elasticsearch.ResourceAlreadyExistsException;
 import org.elasticsearch.action.IndicesRequest;
@@ -23,21 +24,27 @@ import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.unit.ByteSizeValue;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
  * @author GraviteeSource Team
+ * @author Guillaume Gillon
  */
 public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcessor> {
 
@@ -49,6 +56,8 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
     private final static String FIELD_TYPE_INTEGER = "integer";
     private final static String FIELD_TYPE_BOOLEAN = "boolean";
     private final static String FIELD_TYPE_OBJECT = "object";
+    private final static String FIELD_TYPE_IP = "ip";
+    private final static String FIELD_TYPE_GEO_POINT = "geo_point";
     private final static String FIELD_INDEX = "index";
     private final static String FIELD_ENABLED = "enabled";
     private final static String FIELD_INDEX_NOT_ANALYZED = "false";
@@ -58,6 +67,9 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
 
     @Autowired
     private ElasticConfiguration config;
+
+    @Autowired
+    private PipelineConfiguration pipelineConfig;
 
     @Override
     public Class<?> getObjectType() {
@@ -73,6 +85,7 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
                     public void beforeBulk(long executionId, BulkRequest request) {
                         if (request.numberOfActions() > 0) {
                             initializeIndices(request);
+                            initializePipeline();
                         }
                     }
 
@@ -103,6 +116,38 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
             LOGGER.error("An error occurs while creating indices", ex);
         }
     }
+
+    private void initializePipeline() {
+       try {
+            LOGGER.info("Looking for pipeline [{}]", config.getPipelineName());
+            String pipelineName = this.config.getPipelineName();
+            List<String> ingestPlugs = this.config.getIngestPlugins();
+
+            XContentBuilder builder = pipelineConfig.createPipeline();
+
+            if(builder != null) {
+                client.admin().cluster().preparePutPipeline(config.getPipelineName(), builder.bytes()).execute().actionGet();
+            }
+
+        } catch (Exception ex) {
+            LOGGER.error("An error occurs while creating pipeline", ex);
+           pipelineConfig.removePipeline();
+        }
+    }
+
+    /*private BytesReference createGeoIp(XContentBuilder builder) throws IOException {
+        return XContentFactory.jsonBuilder()
+                .startObject()
+                    .field("description", "Gravitee pipeline")
+                    .startArray("processors")
+                        .startObject()
+                            .startObject("geoip")
+                            .field("field", "remote-address")
+                            .endObject()
+                        .endObject()
+                    .endArray()
+                .endObject().bytes();
+    }*/
 
     /**
      * Create elasticsearch index.
@@ -143,7 +188,16 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
                     .startObject("path").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                     .startObject("endpoint").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).endObject()
                     .startObject("local-address").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                    .startObject("remote-address").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                    .startObject("remote-address").field(FIELD_TYPE, FIELD_TYPE_IP).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
+                    .startObject("geoip")
+                        .startObject("properties")
+                        .startObject("continent_name").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX).endObject()
+                        .startObject("country_iso_code").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX).endObject()
+                        .startObject("region_name").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX).endObject()
+                        .startObject("city_name").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX).endObject()
+                        .startObject("location").field(FIELD_TYPE, FIELD_TYPE_GEO_POINT).endObject()
+                        .endObject()
+                    .endObject()
                     .startObject("method").field(FIELD_TYPE, FIELD_TYPE_SHORT).endObject()
                     .startObject("tenant").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).endObject()
                     .startObject("status").field(FIELD_TYPE, FIELD_TYPE_SHORT).endObject()

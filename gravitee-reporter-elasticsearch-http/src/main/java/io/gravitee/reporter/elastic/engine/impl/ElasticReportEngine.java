@@ -22,6 +22,7 @@ import io.gravitee.reporter.api.http.Metrics;
 import io.gravitee.reporter.api.log.Log;
 import io.gravitee.reporter.api.monitor.Monitor;
 import io.gravitee.reporter.elastic.config.ElasticConfiguration;
+import io.gravitee.reporter.elastic.config.PipelineConfiguration;
 import io.gravitee.reporter.elastic.engine.ReportEngine;
 import io.gravitee.reporter.elastic.indexer.ElasticsearchBulkIndexer;
 import io.gravitee.reporter.elastic.templating.freemarker.FreeMarkerComponent;
@@ -45,6 +46,7 @@ import java.util.Map;
  * 
  * @author Sebastien Devaux (Zenika)
  * @author Guillaume Waignier (Zenika)
+ * @author Guillaume Gillon
  *
  */
 public final class ElasticReportEngine implements ReportEngine {
@@ -67,6 +69,12 @@ public final class ElasticReportEngine implements ReportEngine {
 	 */
 	@Autowired
 	private ElasticConfiguration configuration;
+
+	/**
+	 * Configuration of Pipeline.
+	 */
+	@Autowired
+	private PipelineConfiguration pipelineConfiguration;
 
 	/**
 	 * Templating tool.
@@ -105,7 +113,7 @@ public final class ElasticReportEngine implements ReportEngine {
 				.just(reportable)
 				.flatMap(reportable1 -> {
                     if (reportable1 instanceof Metrics) {
-						return Flowable.just(getSource((Metrics) reportable1));
+						return Flowable.just(getSource((Metrics) reportable1, pipelineConfiguration.getPipeline()));
                     } else if (reportable1 instanceof EndpointStatus) {
                         return Flowable.just(getSource((EndpointStatus) reportable1));
                     } else if (reportable1 instanceof Monitor) {
@@ -125,12 +133,15 @@ public final class ElasticReportEngine implements ReportEngine {
 	 * @param metrics A request metrics
 	 * @return ES bulk line
 	 */
-	private String getSource(final Metrics metrics) {
+	private String getSource(final Metrics metrics, String pipeline) {
 		final Map<String, Object> data = new HashMap<>();
 
 		data.put("index", this.getIndexName(metrics));
 		data.put("documentType", TYPE_REQUEST);
 		data.put("metrics", metrics);
+		if (pipeline != null) {
+			data.put("pipeline", pipeline);
+		}
 
 		data.put(Fields.SPECIAL_TIMESTAMP, dtf.format(metrics.timestamp()));
 		data.put(Fields.GATEWAY, node.id());

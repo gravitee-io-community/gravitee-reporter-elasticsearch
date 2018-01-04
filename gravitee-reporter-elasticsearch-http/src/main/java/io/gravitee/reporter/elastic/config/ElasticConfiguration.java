@@ -21,6 +21,8 @@ import org.springframework.core.env.Environment;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Elasticsearch client reporter configuration.
@@ -29,6 +31,7 @@ import java.util.List;
  * @author GraviteeSource Team
  * @author Guillaume Waignier (Zenika)
  * @author Sebastien Devaux (Zenika)
+ * @author Guillaume Gillon
  */
 public class ElasticConfiguration {
 
@@ -67,6 +70,14 @@ public class ElasticConfiguration {
 	@Value("${reporters.elasticsearch.security.password:#{null}}")
 	private String password;
 
+    @Value("${reporters.elasticsearch.pipeline.name:gravitee_pipeline}")
+    private String pipelineName;
+
+	/**
+	 * Elasticsearch ingest plugins.
+	 */
+	private List<String> ingestPlugins;
+
 	/**
 	 * Settings: number of shards
 	 */
@@ -92,9 +103,21 @@ public class ElasticConfiguration {
 		return endpoints;
 	}
 
-	public void setEndpoints(List<Endpoint> endpoints) {
-		this.endpoints = endpoints;
-	}
+    public void setEndpoints(List<Endpoint> endpoints) {
+        this.endpoints = endpoints;
+    }
+
+    public List<String> getIngestPlugins() {
+        if(ingestPlugins == null){
+            ingestPlugins = initializeIngestPlugins();
+        }
+
+        return ingestPlugins;
+    }
+
+    public void setIngestPlugins(List<String> ingestPlugins) {
+        this.ingestPlugins = ingestPlugins;
+    }
 
 	public Integer getBulkActions() {
 		return bulkActions;
@@ -127,6 +150,14 @@ public class ElasticConfiguration {
 		return endpoints;
 	}
 
+    private List<String> initializeIngestPlugins() {
+        String ingestPluginsSt = environment.getProperty("reporters.elasticsearch.pipeline.plugins.ingest", String.class);
+        return ingestPluginsSt != null ? Pattern.compile(",").splitAsStream(ingestPluginsSt)
+                .map((String::trim))
+                .map(String::toLowerCase)
+                .collect(Collectors.toList()) : null;
+    }
+
 	public String getUsername() {
 		return username;
 	}
@@ -142,6 +173,10 @@ public class ElasticConfiguration {
 	public void setPassword(String password) {
 		this.password = password;
 	}
+
+    public String getPipelineName() { return pipelineName; }
+
+    public void setPipelineName(String pipelineName) { this.pipelineName = pipelineName; }
 
 	public int getNumberOfShards() {
 		return numberOfShards;

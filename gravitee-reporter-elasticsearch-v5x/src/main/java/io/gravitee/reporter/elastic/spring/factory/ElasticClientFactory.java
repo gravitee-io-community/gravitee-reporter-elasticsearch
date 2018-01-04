@@ -55,7 +55,8 @@ public class ElasticClientFactory extends AbstractFactoryBean<Client> {
 	}
 
 	private Client createTransportClient() {
-		Settings settings = Settings.builder().put("cluster.name", configuration.getClusterName()).build();
+		Settings settings = Settings.builder()
+				.put("cluster.name", configuration.getClusterName()).build();
 		TransportClient transportClient = new PreBuiltTransportClient(settings);
 
 		List<HostAddress> adresses = configuration.getHostsAddresses();

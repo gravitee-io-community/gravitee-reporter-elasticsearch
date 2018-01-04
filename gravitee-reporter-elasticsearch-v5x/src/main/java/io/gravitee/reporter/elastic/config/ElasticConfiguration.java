@@ -23,6 +23,8 @@ import org.springframework.core.env.Environment;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Elasticsearch client reporter configuration.
@@ -73,6 +75,14 @@ public class ElasticConfiguration {
 	@Value("${reporters.elasticsearch.bulk.concurrent_requests:5}")
 	private Integer concurrentRequests;
 
+	@Value("${reporters.elasticsearch.pipeline.name:gravitee_pipeline}")
+	private String pipelineName;
+
+	/**
+	 * Elasticsearch ingest plugins.
+	 */
+	private List<String> ingestPlugins;
+
 	/**
 	 * Elasticsearch hosts
 	 */
@@ -86,11 +96,23 @@ public class ElasticConfiguration {
 		return clusterName;
 	}
 
-	public List<HostAddress> getHostsAddresses() {
-		if(hostsAddresses == null){
-			hostsAddresses = initializeHostsAddresses();
+    public List<HostAddress> getHostsAddresses() {
+        if(hostsAddresses == null){
+            hostsAddresses = initializeHostsAddresses();
+        }
+        return hostsAddresses;
+    }
+
+	public List<String> getIngestPlugins() {
+		if(ingestPlugins == null){
+			ingestPlugins = initializeIngestPlugins();
 		}
-		return hostsAddresses;
+
+		return ingestPlugins;
+	}
+
+	public void setIngestPlugins(List<String> ingestPlugins) {
+		this.ingestPlugins = ingestPlugins;
 	}
 
 	public Integer getBulkActions() {
@@ -136,4 +158,16 @@ public class ElasticConfiguration {
 		}
 		return res;
 	}
+
+	private List<String> initializeIngestPlugins() {
+		String ingestPluginsSt = environment.getProperty("reporters.elasticsearch.pipeline.plugins.ingest", String.class);
+		return ingestPluginsSt != null ? Pattern.compile(",").splitAsStream(ingestPluginsSt)
+				.map((String::trim))
+				.map(String::toLowerCase)
+				.collect(Collectors.toList()) : null;
+	}
+
+    public String getPipelineName() { return pipelineName; }
+
+    public void setPipelineName(String pipelineName) { this.pipelineName = pipelineName; }
 }
