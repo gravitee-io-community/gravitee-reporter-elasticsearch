@@ -16,6 +16,7 @@
 package io.gravitee.reporter.elastic.spring;
 
 import io.gravitee.reporter.elastic.config.ElasticConfiguration;
+import io.gravitee.reporter.elastic.config.PipelineConfiguration;
 import io.gravitee.reporter.elastic.engine.ReportEngine;
 import io.gravitee.reporter.elastic.engine.impl.ElasticReportEngine;
 import io.gravitee.reporter.elastic.spring.conditional.ElasticClientTransportCondition;
@@ -28,7 +29,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ReporterConfiguration {
 
-	@Bean @Conditional(ElasticClientTransportCondition.class)
+
+    @Bean @Conditional(ElasticClientTransportCondition.class)
     public ElasticClientFactory elasticClientFactory() {
         return new ElasticClientFactory();
     }
@@ -47,4 +49,7 @@ public class ReporterConfiguration {
     public ElasticConfiguration configuration(){
     	return new ElasticConfiguration();
     }
+
+    @Bean
+    public PipelineConfiguration processorConfiguration() {return new PipelineConfiguration();}
 }

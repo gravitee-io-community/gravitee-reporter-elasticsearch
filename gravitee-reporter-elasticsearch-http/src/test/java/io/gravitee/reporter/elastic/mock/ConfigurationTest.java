@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 /**
@@ -45,6 +46,7 @@ public class ConfigurationTest {
     @Bean
     public ElasticConfiguration elasticConfiguration(ElasticConfiguration elasticConfiguration) {
         elasticConfiguration.setEndpoints(Collections.singletonList(new Endpoint("http://localhost:" + elasticsearchNode().getHttpPort())));
+        elasticConfiguration.setIngestPlugins(Arrays.asList("geoip"));
         return elasticConfiguration;
     }
 

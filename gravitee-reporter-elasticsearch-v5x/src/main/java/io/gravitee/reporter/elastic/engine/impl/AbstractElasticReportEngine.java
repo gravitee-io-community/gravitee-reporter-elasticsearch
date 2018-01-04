@@ -24,6 +24,7 @@ import io.gravitee.reporter.api.log.Log;
 import io.gravitee.reporter.api.monitor.JvmInfo;
 import io.gravitee.reporter.api.monitor.Monitor;
 import io.gravitee.reporter.elastic.config.ElasticConfiguration;
+import io.gravitee.reporter.elastic.config.PipelineConfiguration;
 import io.gravitee.reporter.elastic.engine.ReportEngine;
 import org.elasticsearch.common.unit.ByteSizeValue;
 import org.elasticsearch.common.unit.TimeValue;
@@ -45,6 +46,9 @@ public abstract class AbstractElasticReportEngine implements ReportEngine {
 
 	@Autowired
 	private ElasticConfiguration configuration;
+
+	@Autowired
+	private PipelineConfiguration pipelineConfiguration;
 
 	@Autowired
 	private Node node;
@@ -386,5 +390,13 @@ public abstract class AbstractElasticReportEngine implements ReportEngine {
 
 	protected String getIndexName(Reportable reportable){
 		return String.format("%s-%s", configuration.getIndexName(), sdf.format(reportable.timestamp()));
+	}
+
+	protected  String getPipeline() {
+		return pipelineConfiguration.getPipeline();
+	}
+
+	protected  boolean isPipelineEnable() {
+		return pipelineConfiguration.getPipeline() != null;
 	}
 }

@@ -6,7 +6,7 @@
       null
 </#if>
 </#macro>
-{ "index" : { "_index" : "${index}", "_type" : "${documentType}", "_id" : "${metrics.getRequestId()}" } }
+{ "index" : { "_index" : "${index}", "_type" : "${documentType}", "_id" : "${metrics.getRequestId()}"<#if pipeline??>, "pipeline" : "${pipeline}"</#if>} }
 <@compress single_line=true>
 {
   "gateway":"${gateway}"

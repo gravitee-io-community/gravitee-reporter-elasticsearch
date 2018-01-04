@@ -16,6 +16,7 @@
 package io.gravitee.reporter.elastic.spring;
 
 import io.gravitee.reporter.elastic.config.ElasticConfiguration;
+import io.gravitee.reporter.elastic.config.PipelineConfiguration;
 import io.gravitee.reporter.elastic.engine.ReportEngine;
 import io.gravitee.reporter.elastic.engine.impl.ElasticReportEngine;
 import io.gravitee.reporter.elastic.indexer.ElasticsearchBulkIndexer;
@@ -50,5 +51,10 @@ public class ReporterConfiguration {
     @Bean
     public FreeMarkerComponent freeMarckerComponent() {
         return new FreeMarkerComponent();
+    }
+
+    @Bean
+    public PipelineConfiguration pipelineConfiguration() {
+        return new PipelineConfiguration();
     }
 }

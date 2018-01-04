@@ -21,6 +21,7 @@ import io.gravitee.common.http.HttpStatusCode;
 import io.gravitee.common.http.MediaType;
 import io.gravitee.reporter.elastic.config.ElasticConfiguration;
 import io.gravitee.reporter.elastic.config.Endpoint;
+import io.gravitee.reporter.elastic.config.PipelineConfiguration;
 import io.gravitee.reporter.elastic.model.elasticsearch.Health;
 import io.gravitee.reporter.elastic.model.exception.TechnicalException;
 import io.gravitee.reporter.elastic.templating.freemarker.FreeMarkerComponent;
@@ -56,6 +57,7 @@ import java.util.stream.Collectors;
  * 
  * @author Guillaume Waignier
  * @author Sebastien Devaux
+ * @author Guillaume Gillon
  *
  */
 public class ElasticsearchBulkIndexer {
@@ -67,16 +69,23 @@ public class ElasticsearchBulkIndexer {
 	private static final String URL_STATE_CLUSTER = "/_cluster/health";
 	private static final String URL_TEMPLATE = "/_template";
 	private static final String URL_BULK = "/_bulk";
+	private static final String URL_INGEST = "/_ingest/pipeline";
 
 	private static final String CONTENT_TYPE = MediaType.APPLICATION_JSON + ";charset=UTF-8";
 
 	private static final String HTTPS_SCHEME = "https";
 
-	/**
+    /**
 	 * Configuration of Elasticsearch (cluster name, addresses, ...)
 	 */
 	@Autowired
 	private ElasticConfiguration configuration;
+
+    /**
+     * Configuration of pipelineConfiguration
+     */
+    @Autowired
+    private PipelineConfiguration pipelineConfiguration;
 
 	/**
 	 * Templating tool.
@@ -106,7 +115,7 @@ public class ElasticsearchBulkIndexer {
 
 	private int majorVersion;
 
-	/**
+    /**
 	 * Initialize the Async REST client.
 	 */
 	public void start() throws ExecutionException, InterruptedException, IOException, TechnicalException {
@@ -145,8 +154,9 @@ public class ElasticsearchBulkIndexer {
 			}
 
 			this.ensureTemplate();
+            this.ensureIngestPlugins();
 
-			bulkProcessor
+            bulkProcessor
 					.buffer(
 							configuration.getFlushInterval(),
 							TimeUnit.SECONDS,
@@ -259,7 +269,43 @@ public class ElasticsearchBulkIndexer {
 		}
 	}
 
-	public void index(final String data) {
+    /**
+     * Put the ingest template.
+     *
+     * @throws TechnicalException
+     *             when a problem occur during the http call
+     */
+    private void ensureIngestPlugins() throws TechnicalException {
+        try {
+            String pipelineTemplate = pipelineConfiguration.createPipeline(this.majorVersion);
+
+            if (pipelineTemplate != null && pipelineConfiguration.getPipeline() != null) {
+                logger.debug("PUT ingest pipeline template : {}", pipelineTemplate);
+
+                HttpClientRequest req = httpClient.put( URL_INGEST + "/" + pipelineConfiguration.getPipeline());
+                VertxHttpResponse response = doRequest(req, pipelineTemplate).blockingGet();
+
+                String body = response.body.toString();
+
+                if (response.response.statusCode() != HttpStatusCode.OK_200) {
+                    logger.error("Impossible to call Elasticsearch PUT {}. Body is {}. Response is {}", URL_INGEST +
+							"/" + pipelineConfiguration.getPipeline(), body, response.response.statusCode());
+                } else {
+
+                    logger.info("Manage Ingest pipeline {}", pipelineConfiguration.getIngestPlugins().toString());
+                }
+
+                logger.debug("Response of ES for PUT {} : {}",  URL_INGEST + "/" + pipelineConfiguration.getPipeline() , body);
+            }
+
+        } catch (final Exception e) {
+            logger.error("Impossible to call ingest pipeline " + pipelineConfiguration.getPipeline() +
+					" with ingest plugins " + pipelineConfiguration.getIngestPlugins(), e);
+            pipelineConfiguration.removePipeline();
+        }
+    }
+
+    public void index(final String data) {
 		bulkProcessor.onNext(data);
 	}
 
