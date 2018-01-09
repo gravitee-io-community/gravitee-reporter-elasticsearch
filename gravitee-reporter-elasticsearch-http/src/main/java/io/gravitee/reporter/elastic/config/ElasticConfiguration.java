@@ -68,6 +68,18 @@ public class ElasticConfiguration {
 	private String password;
 
 	/**
+	 * Settings: number of shards
+	 */
+	@Value("${reporters.elasticsearch.settings.number_of_shards:5}")
+	private int numberOfShards;
+
+	/**
+	 * Settings: number of replicas
+	 */
+	@Value("${reporters.elasticsearch.settings.number_of_replicas:1}")
+	private int numberOfReplicas;
+
+	/**
 	 * Elasticsearch endpoints
 	 */
 	private List<Endpoint> endpoints;
@@ -131,4 +143,19 @@ public class ElasticConfiguration {
 		this.password = password;
 	}
 
+	public int getNumberOfShards() {
+		return numberOfShards;
+	}
+
+	public void setNumberOfShards(int numberOfShards) {
+		this.numberOfShards = numberOfShards;
+	}
+
+	public int getNumberOfReplicas() {
+		return numberOfReplicas;
+	}
+
+	public void setNumberOfReplicas(int numberOfReplicas) {
+		this.numberOfReplicas = numberOfReplicas;
+	}
 }
