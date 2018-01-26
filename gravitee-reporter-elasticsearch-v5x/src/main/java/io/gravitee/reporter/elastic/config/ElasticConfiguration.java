@@ -160,7 +160,8 @@ public class ElasticConfiguration {
 	}
 
 	private List<String> initializeIngestPlugins() {
-		String ingestPluginsSt = environment.getProperty("reporters.elasticsearch.pipeline.plugins.ingest", String.class);
+		String ingestPluginsSt = environment.getProperty(
+				"reporters.elasticsearch.pipeline.plugins.ingest", "geopip");
 		return ingestPluginsSt != null ? Pattern.compile(",").splitAsStream(ingestPluginsSt)
 				.map((String::trim))
 				.map(String::toLowerCase)
