@@ -279,29 +279,29 @@ public class ElasticsearchBulkIndexer {
         try {
             String pipelineTemplate = pipelineConfiguration.createPipeline(this.majorVersion);
 
-            if (pipelineTemplate != null && pipelineConfiguration.getPipeline() != null) {
+            if (pipelineTemplate != null && pipelineConfiguration.getPipelineName() != null) {
                 logger.debug("PUT ingest pipeline template : {}", pipelineTemplate);
 
-                HttpClientRequest req = httpClient.put( URL_INGEST + "/" + pipelineConfiguration.getPipeline());
+                HttpClientRequest req = httpClient.put( URL_INGEST + "/" + pipelineConfiguration.getPipelineName());
                 VertxHttpResponse response = doRequest(req, pipelineTemplate).blockingGet();
 
                 String body = response.body.toString();
 
                 if (response.response.statusCode() != HttpStatusCode.OK_200) {
-                    logger.error("Impossible to call Elasticsearch PUT {}. Body is {}. Response is {}", URL_INGEST +
-							"/" + pipelineConfiguration.getPipeline(), body, response.response.statusCode());
+                    logger.debug("Impossible to call Elasticsearch PUT {}. {}.", URL_INGEST +
+							"/" + pipelineConfiguration.getPipelineName(), body);
+					logger.warn("Impossible to create a pipeline for " + pipelineConfiguration.getIngestManaged());
                 } else {
-
                     logger.info("Manage Ingest pipeline {}", pipelineConfiguration.getIngestPlugins().toString());
                 }
 
-                logger.debug("Response of ES for PUT {} : {}",  URL_INGEST + "/" + pipelineConfiguration.getPipeline() , body);
+                logger.debug("Response of ES for PUT {} : {}",  URL_INGEST + "/" + pipelineConfiguration.getPipelineName() , body);
+            	this.pipelineConfiguration.valid();
             }
 
         } catch (final Exception e) {
-            logger.error("Impossible to call ingest pipeline " + pipelineConfiguration.getPipeline() +
+            logger.error("Impossible to call ingest pipeline " + pipelineConfiguration.getPipelineName() +
 					" with ingest plugins " + pipelineConfiguration.getIngestPlugins(), e);
-            pipelineConfiguration.removePipeline();
         }
     }
 

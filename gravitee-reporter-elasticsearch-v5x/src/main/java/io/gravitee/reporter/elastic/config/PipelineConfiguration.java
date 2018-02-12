@@ -58,11 +58,10 @@ public class PipelineConfiguration {
         }
     }
 
+    private final String pipeline = "gravitee_pipeline";
 
-    @Autowired
-    private ElasticConfiguration config;
-
-    private String pipeline;
+    private boolean valid = false;
+    private boolean initialize = false;
 
     private static StringBuilder initPipeline() {
         StringBuilder stringBuilder = new StringBuilder();
@@ -76,43 +75,45 @@ public class PipelineConfiguration {
     public XContentBuilder createPipeline() throws IOException {
         XContentBuilder template = null;
 
-        List<String> ingestPlugins = this.config.getIngestPlugins();
-        List<String> ingestPluginsValid = ingestPlugins.stream().filter(Processor.ingestManaged::contains).collect(Collectors.toList());
 
-        if (ingestPlugins.size() != ingestPluginsValid.size()) {
-            ingestPlugins.stream().filter(ingest -> !Processor.ingestManaged.contains(ingest)).forEach(ingest -> LOGGER.error("Ingest {} is not managed in gravitee", ingest));
-        }
+        StringBuilder stringBuilder = Processor.ingestManaged.stream()
+                .map(processor -> Processor.valueOf(processor).contentBuilder)
+                .collect(Collector.of(
+                        PipelineConfiguration::initPipeline,
+                        (response, processor) -> processor.apply(response),
+                        StringBuilder::append,
+                        PipelineConfiguration::finisherPipeline
+                ));
 
-        if (!ingestPluginsValid.isEmpty()) {
-
-            StringBuilder stringBuilder = ingestPluginsValid.stream()
-                    .map(processor -> Processor.valueOf(processor).contentBuilder)
-                    .collect(Collector.of(
-                            PipelineConfiguration::initPipeline,
-                            (response, processor) -> processor.apply(response),
-                            StringBuilder::append,
-                            PipelineConfiguration::finisherPipeline
-                    ));
-
-            try (XContentParser parser =
-                         XContentFactory.xContent(XContentType.JSON).createParser(stringBuilder.toString().getBytes())) {
-                parser.nextToken();
-                template = XContentFactory.jsonBuilder().copyCurrentStructure(parser);
-            }
-        }
-
-        if(template != null) {
-            pipeline = config.getPipelineName();
+        try (XContentParser parser =
+                     XContentFactory.xContent(XContentType.JSON).createParser(stringBuilder.toString().getBytes())) {
+            parser.nextToken();
+            template = XContentFactory.jsonBuilder().copyCurrentStructure(parser);
         }
 
         return template;
     }
 
-    public void removePipeline() {
-        this.pipeline = null;
+    public String getIngestManaged() {
+        return Processor.ingestManaged.stream().collect(Collectors.joining(","));
     }
 
-    public String getPipeline() {
-        return this.pipeline;
+    public String getPipelineName() { return this.pipeline; }
+
+    public String getPipeline() { return valid ? this.pipeline : null; }
+
+    public void valid() {
+        this.valid = true;
+    }
+
+    public boolean isValid() {
+        return this.valid;
+    }
+
+    public void initialize() {
+        this.initialize = true;
+    }
+    public boolean isInitialize() {
+        return this.initialize;
     }
 }

@@ -52,19 +52,7 @@ public class PipelineConfigurationTest {
 
     @Before
     public void init() {
-        MockitoAnnotations.initMocks(this);
 
-        when(config.getPipelineName()).thenReturn("pipeline_id");
-    }
-
-    @Test
-    public void Should_no_valid_pipeline_with_ingest_test() throws IOException {
-        when(config.getIngestPlugins()).thenReturn(Arrays.asList("test"));
-
-        XContentBuilder builder = pipelineConfiguration.createPipeline();
-
-        Assert.assertNull(builder);
-        Assert.assertNull(pipelineConfiguration.getPipeline());
     }
 
     @Test
@@ -108,22 +96,27 @@ public class PipelineConfigurationTest {
                 .endArray()
                 .endObject();
 
-        when(config.getIngestPlugins()).thenReturn(Arrays.asList("geoip"));
-
         XContentBuilder builder2 = pipelineConfiguration.createPipeline();
 
         Assert.assertEquals(builder1.string(), builder2.string());
     }
 
     @Test
-    public void should_return_pipeline_name() throws IOException {
+    public void should_return_pipeline_null() throws IOException {
         //String result = "{\"description\":\"Gravitee pipeline\",\"processors\":[{\"geoip\":{\"field\":\"remote-address\"}}]}";
-
-
-        when(config.getIngestPlugins()).thenReturn(Arrays.asList("geoip"));
 
         XContentBuilder builder2 = pipelineConfiguration.createPipeline();
 
-        Assert.assertEquals("pipeline_id", pipelineConfiguration.getPipeline());
+        Assert.assertNull(pipelineConfiguration.getPipeline());
+    }
+
+    @Test
+    public void should_return_pipeline_not_null() throws IOException {
+        //String result = "{\"description\":\"Gravitee pipeline\",\"processors\":[{\"geoip\":{\"field\":\"remote-address\"}}]}";
+
+        XContentBuilder builder2 = pipelineConfiguration.createPipeline();
+        pipelineConfiguration.valid();
+
+        Assert.assertEquals("gravitee_pipeline", pipelineConfiguration.getPipeline());
     }
 }

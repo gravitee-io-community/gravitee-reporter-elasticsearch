@@ -70,9 +70,6 @@ public class ElasticConfiguration {
 	@Value("${reporters.elasticsearch.security.password:#{null}}")
 	private String password;
 
-    @Value("${reporters.elasticsearch.pipeline.name:gravitee_pipeline}")
-    private String pipelineName;
-
 	/**
 	 * Elasticsearch ingest plugins.
 	 */
@@ -105,14 +102,6 @@ public class ElasticConfiguration {
 
     public void setEndpoints(List<Endpoint> endpoints) {
         this.endpoints = endpoints;
-    }
-
-    public List<String> getIngestPlugins() {
-        if(ingestPlugins == null){
-            ingestPlugins = initializeIngestPlugins();
-        }
-
-        return ingestPlugins;
     }
 
     public void setIngestPlugins(List<String> ingestPlugins) {
@@ -150,15 +139,6 @@ public class ElasticConfiguration {
 		return endpoints;
 	}
 
-    private List<String> initializeIngestPlugins() {
-		String ingestPluginsSt = environment.getProperty(
-				"reporters.elasticsearch.pipeline.plugins.ingest", "geopip");
-        return ingestPluginsSt != null ? Pattern.compile(",").splitAsStream(ingestPluginsSt)
-                .map((String::trim))
-                .map(String::toLowerCase)
-                .collect(Collectors.toList()) : null;
-    }
-
 	public String getUsername() {
 		return username;
 	}
@@ -174,10 +154,6 @@ public class ElasticConfiguration {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-
-    public String getPipelineName() { return pipelineName; }
-
-    public void setPipelineName(String pipelineName) { this.pipelineName = pipelineName; }
 
 	public int getNumberOfShards() {
 		return numberOfShards;

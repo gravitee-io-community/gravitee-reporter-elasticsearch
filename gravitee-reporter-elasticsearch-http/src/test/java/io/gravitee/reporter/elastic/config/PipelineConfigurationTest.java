@@ -53,9 +53,6 @@ public class PipelineConfigurationTest {
     public void init() {
         //MockitoAnnotations.initMocks(this);
 
-        when(config.getPipelineName()).thenReturn("gravitee_pipeline");
-        when(config.getPipelineName()).thenReturn("pipeline_id");
-
         when(freeMarkerComponent.generateFromTemplate("geoip.ftl"))
                 .thenReturn("{\"geoip\" : {\"field\" : \"remote-address\"}}");
         Map<String,Object> processorsMap = new HashMap<>(1);
@@ -65,18 +62,7 @@ public class PipelineConfigurationTest {
     }
 
     @Test
-    public void Should_no_valid_pipeline_with_ingest_test() {
-        when(config.getIngestPlugins()).thenReturn(Arrays.asList("test"));
-
-        String pipeline = pipelineConfiguration.createPipeline(5);
-
-        Assert.assertNull(pipeline);
-        Assert.assertNull(pipelineConfiguration.getPipeline());
-    }
-
-    @Test
     public void should_not_valid_pipeline_with_ingest_geoip_and_version_4() {
-        when(config.getIngestPlugins()).thenReturn(Arrays.asList("geoip"));
 
         String pipeline = pipelineConfiguration.createPipeline(4);
 
@@ -87,9 +73,6 @@ public class PipelineConfigurationTest {
     public void should_valid_pipeline_with_ingest_geoip() {
         String result = "{\"description\":\"Gravitee pipeline\",\"processors\":[{\"geoip\":{\"field\":\"remote-address\"}}]}";
 
-
-        when(config.getIngestPlugins()).thenReturn(Arrays.asList("geoip"));
-
         String pipeline = pipelineConfiguration.createPipeline(5);
 
         Assert.assertEquals(result, pipeline);
@@ -99,12 +82,20 @@ public class PipelineConfigurationTest {
     public void should_return_pipeline_name() {
         //String result = "{\"description\":\"Gravitee pipeline\",\"processors\":[{\"geoip\":{\"field\":\"remote-address\"}}]}";
 
+        String builder2 = pipelineConfiguration.createPipeline(5);
+        pipelineConfiguration.valid();
 
-        when(config.getIngestPlugins()).thenReturn(Arrays.asList("geoip"));
-        when(config.getPipelineName()).thenReturn("pipeline_id");
+        Assert.assertEquals("gravitee_pipeline", pipelineConfiguration.getPipeline());
+        Assert.assertEquals("gravitee_pipeline", pipelineConfiguration.getPipelineName());
+    }
+
+    @Test
+    public void should_not_return_pipeline_name_when_not_valided() {
 
         String builder2 = pipelineConfiguration.createPipeline(5);
 
-        Assert.assertEquals("pipeline_id", pipelineConfiguration.getPipeline());
+        Assert.assertNull(pipelineConfiguration.getPipeline());
+        Assert.assertEquals("gravitee_pipeline", pipelineConfiguration.getPipelineName());
+
     }
 }
