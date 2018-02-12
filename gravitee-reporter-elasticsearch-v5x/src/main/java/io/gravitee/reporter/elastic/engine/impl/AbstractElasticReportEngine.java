@@ -397,6 +397,6 @@ public abstract class AbstractElasticReportEngine implements ReportEngine {
 	}
 
 	protected  boolean isPipelineEnable() {
-		return pipelineConfiguration.getPipeline() != null;
+		return pipelineConfiguration.isValid();
 	}
 }

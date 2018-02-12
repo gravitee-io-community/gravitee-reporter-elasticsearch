@@ -36,65 +36,49 @@ public class PipelineConfiguration {
 
     private static final List<String> ingestManaged = Collections.singletonList("geoip");
 
-    private List<String> ingestPluginsValid;
-
-    /**
-     * Configuration of Elasticsearch
-     */
-    @Autowired
-    private ElasticConfiguration configuration;
-
     /**
      * Templating tool.
      */
     @Autowired
     private FreeMarkerComponent freeMarkerComponent;
 
-    private String pipeline;
+    private final String pipeline = "gravitee_pipeline";
+
+    private boolean valid = false;
 
     public String createPipeline(int majorVersion) {
         String template = null;
 
-        List<String> ingestPlugins = this.configuration.getIngestPlugins();
-
-        if (ingestPlugins == null) return null;
         if (majorVersion < 5) {
             LOGGER.error("Ingest is not managed for the elasticsearch version below 5");
             return null;
         }
 
-        this.ingestPluginsValid = ingestPlugins.stream().filter(ingestManaged::contains).collect(Collectors.toList());
+        String processors = this.ingestManaged.stream()
+                .map(ingestPlug -> this.freeMarkerComponent.generateFromTemplate(ingestPlug + ".ftl"))
+                .collect(
+                        Collectors.joining(","));
 
-        if (ingestPlugins.size() != this.ingestPluginsValid.size()) {
-            ingestPlugins.stream().filter(ingest -> !ingestManaged.contains(ingest))
-                    .forEach(ingest -> LOGGER.error("Ingest {} is not managed in gravitee", ingest));
-        }
-
-        if (this.ingestPluginsValid != null && this.ingestPluginsValid.size() > 0) {
-            String processors = this.ingestPluginsValid.stream()
-                    .map(ingestPlug -> this.freeMarkerComponent.generateFromTemplate(ingestPlug + ".ftl"))
-                    .collect(
-                            Collectors.joining(","));
-
-            Map<String,Object> processorsMap = new HashMap<>(1);
-            processorsMap.put("processors", processors);
-            template = this.freeMarkerComponent.generateFromTemplate("pipeline.ftl", processorsMap);
-
-            this.pipeline = this.configuration.getPipelineName();
-        }
+        Map<String,Object> processorsMap = new HashMap<>(1);
+        processorsMap.put("processors", processors);
+        template = this.freeMarkerComponent.generateFromTemplate("pipeline.ftl", processorsMap);
 
         return template;
     }
 
+    public String getIngestManaged() {
+        return ingestManaged.stream().collect(Collectors.joining(","));
+    }
+
     public List<String> getIngestPlugins() {
-        return this.ingestPluginsValid;
+        return this.ingestManaged;
     }
 
-    public String getPipeline() {
-        return this.pipeline;
-    }
+    public String getPipelineName() { return this.pipeline; }
 
-    public void removePipeline() {
-        this.pipeline = null;
+    public String getPipeline() { return valid ? this.pipeline : null; }
+
+    public void valid() {
+        this.valid = true;
     }
 }

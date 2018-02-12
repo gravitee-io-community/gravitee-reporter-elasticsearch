@@ -118,21 +118,25 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
     }
 
     private void initializePipeline() {
-       try {
-            LOGGER.info("Looking for pipeline [{}]", config.getPipelineName());
-            String pipelineName = this.config.getPipelineName();
-            List<String> ingestPlugs = this.config.getIngestPlugins();
+        if(pipelineConfig.isInitialize()) return;
+
+        try {
+            LOGGER.info("Looking for pipeline [{}]", pipelineConfig.getPipelineName());
+            String pipelineName = this.pipelineConfig.getPipelineName();
 
             XContentBuilder builder = pipelineConfig.createPipeline();
 
             if(builder != null) {
-                client.admin().cluster().preparePutPipeline(config.getPipelineName(), builder.bytes()).execute().actionGet();
+                client.admin().cluster().preparePutPipeline(pipelineConfig.getPipelineName(), builder.bytes()).execute().actionGet();
             }
 
+            pipelineConfig.valid();
         } catch (Exception ex) {
-            LOGGER.error("An error occurs while creating pipeline", ex);
-           pipelineConfig.removePipeline();
+           LOGGER.warn("Impossible to create a pipeline for {}", pipelineConfig.getIngestManaged());
+           LOGGER.debug("An error occurs while creating pipeline", ex);
         }
+
+        pipelineConfig.initialize();
     }
 
     /*private BytesReference createGeoIp(XContentBuilder builder) throws IOException {
