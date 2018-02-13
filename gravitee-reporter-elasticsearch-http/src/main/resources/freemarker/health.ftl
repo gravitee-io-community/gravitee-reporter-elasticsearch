@@ -29,7 +29,7 @@
                 <#list step.getRequest().getHeaders() as headerKey, headerValue>
                 "${headerKey}": [
                     <#list headerValue as value>
-                    "${value}"
+                    "${value?j_string}"
                         <#sep>,</#sep>
                     </#list>
                 ]
@@ -48,7 +48,7 @@
                 <#list step.getResponse().getHeaders() as headerKey, headerValue>
                 "${headerKey}": [
                     <#list headerValue as value>
-                    "${value}"
+                    "${value?j_string}"
                         <#sep>,</#sep>
                     </#list>
                 ]
