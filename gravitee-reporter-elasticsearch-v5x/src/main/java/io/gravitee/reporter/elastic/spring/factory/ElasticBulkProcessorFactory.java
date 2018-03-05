@@ -122,7 +122,6 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
 
         try {
             LOGGER.info("Looking for pipeline [{}]", pipelineConfig.getPipelineName());
-            String pipelineName = this.pipelineConfig.getPipelineName();
 
             XContentBuilder builder = pipelineConfig.createPipeline();
 
@@ -138,20 +137,6 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
 
         pipelineConfig.initialize();
     }
-
-    /*private BytesReference createGeoIp(XContentBuilder builder) throws IOException {
-        return XContentFactory.jsonBuilder()
-                .startObject()
-                    .field("description", "Gravitee pipeline")
-                    .startArray("processors")
-                        .startObject()
-                            .startObject("geoip")
-                            .field("field", "remote-address")
-                            .endObject()
-                        .endObject()
-                    .endArray()
-                .endObject().bytes();
-    }*/
 
     /**
      * Create elasticsearch index.
