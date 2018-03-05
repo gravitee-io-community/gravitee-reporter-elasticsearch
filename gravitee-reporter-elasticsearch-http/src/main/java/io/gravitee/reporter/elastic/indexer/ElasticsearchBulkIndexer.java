@@ -293,10 +293,9 @@ public class ElasticsearchBulkIndexer {
 					logger.warn("Impossible to create a pipeline for " + pipelineConfiguration.getIngestManaged());
                 } else {
                     logger.info("Manage Ingest pipeline {}", pipelineConfiguration.getIngestPlugins().toString());
+                    this.pipelineConfiguration.valid();
                 }
-
                 logger.debug("Response of ES for PUT {} : {}",  URL_INGEST + "/" + pipelineConfiguration.getPipelineName() , body);
-            	this.pipelineConfiguration.valid();
             }
 
         } catch (final Exception e) {
