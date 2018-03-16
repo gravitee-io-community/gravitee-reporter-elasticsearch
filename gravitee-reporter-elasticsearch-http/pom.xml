@@ -153,6 +153,36 @@
 						<es.set.netty.runtime.available.processors>false</es.set.netty.runtime.available.processors>
 					</systemPropertyVariables>
 				</configuration>
+				<executions>
+					<execution>
+						<id>default-test</id>
+						<configuration>
+							<skip>true</skip>
+						</configuration>
+					</execution>
+					<execution>
+						<id>es2x</id>
+						<goals>
+							<goal>test</goal>
+						</goals>
+						<configuration>
+							<systemPropertyVariables>
+								<elasticsearch>2x</elasticsearch>
+							</systemPropertyVariables>
+						</configuration>
+					</execution>
+					<execution>
+						<id>es5x</id>
+						<goals>
+							<goal>test</goal>
+						</goals>
+						<configuration>
+							<systemPropertyVariables>
+								<elasticsearch>5x</elasticsearch>
+							</systemPropertyVariables>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
@@ -160,6 +190,12 @@
 	<profiles>
 		<profile>
 			<id>es-2x</id>
+			<activation>
+				<property>
+					<name>elasticsearch</name>
+					<value>2x</value>
+				</property>
+			</activation>
 			<properties>
 				<elasticsearch.version>2.4.6</elasticsearch.version>
 			</properties>
@@ -168,6 +204,10 @@
 			<id>es-5x</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
+				<property>
+					<name>elasticsearch</name>
+					<value>5x</value>
+				</property>
 			</activation>
 			<properties>
 				<elasticsearch.version>5.6.3</elasticsearch.version>
