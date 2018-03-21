@@ -15,11 +15,10 @@
  */
 package io.gravitee.reporter.elastic.spring;
 
+import io.gravitee.reporter.elastic.client.Client;
+import io.gravitee.reporter.elastic.client.http.HttpClient;
 import io.gravitee.reporter.elastic.config.ElasticConfiguration;
 import io.gravitee.reporter.elastic.config.PipelineConfiguration;
-import io.gravitee.reporter.elastic.engine.ReportEngine;
-import io.gravitee.reporter.elastic.engine.impl.ElasticReportEngine;
-import io.gravitee.reporter.elastic.indexer.ElasticsearchBulkIndexer;
 import io.gravitee.reporter.elastic.templating.freemarker.FreeMarkerComponent;
 import io.vertx.reactivex.core.Vertx;
 import org.springframework.context.annotation.Bean;
@@ -33,15 +32,10 @@ public class ReporterConfiguration {
         return Vertx.newInstance(vertx);
     }
 
-	@Bean
-    public ElasticsearchBulkIndexer elasticsearchComponent() {
-        return new ElasticsearchBulkIndexer();
+    @Bean
+    public Client httpClient() {
+        return new HttpClient();
     }
-
-	@Bean
-	public ReportEngine reportEngine(){
-		return new ElasticReportEngine();
-	}
 
     @Bean 
     public ElasticConfiguration configuration(){
@@ -49,12 +43,12 @@ public class ReporterConfiguration {
     }
 
     @Bean
-    public FreeMarkerComponent freeMarckerComponent() {
-        return new FreeMarkerComponent();
+    public PipelineConfiguration pipelineConfiguration() {
+        return new PipelineConfiguration();
     }
 
     @Bean
-    public PipelineConfiguration pipelineConfiguration() {
-        return new PipelineConfiguration();
+    public FreeMarkerComponent freeMarckerComponent() {
+        return new FreeMarkerComponent();
     }
 }

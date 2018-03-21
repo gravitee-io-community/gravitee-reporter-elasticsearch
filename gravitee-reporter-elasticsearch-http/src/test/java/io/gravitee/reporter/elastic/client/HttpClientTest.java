@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.reporter.elastic.indexer;
+package io.gravitee.reporter.elastic.client;
 
 import io.gravitee.reporter.elastic.mock.ConfigurationTest;
 import io.gravitee.reporter.elastic.model.elasticsearch.Health;
 import io.gravitee.reporter.elastic.model.exception.TechnicalException;
+import io.reactivex.Single;
+import io.reactivex.observers.TestObserver;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,34 +31,32 @@ import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
 /**
- * Test the component that calls ES
- * 
- * @author Guillaume Waignier
- * @author Sebastien Devaux
- *
+ * @author David BRASSELY (david.brassely at graviteesource.com)
+ * @author GraviteeSource Team
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {ConfigurationTest.class})
-public class ElasticsearchBulkIndexerTest {
-	
-	/**
-	 * ES
-	 */
+@ContextConfiguration(classes = { ConfigurationTest.class })
+public class HttpClientTest {
+
     @Autowired
-    private ElasticsearchBulkIndexer elasticsearchBulkIndexer;
+    private Client client;
 
-    /**
-     * Test health
-     * @throws TechnicalException
-     */
     @Test
-    public void testGenerateFromTemplateWithoutData() throws TechnicalException, InterruptedException, ExecutionException, IOException {
-        elasticsearchBulkIndexer.start();
+    public void shouldGetVersion() throws TechnicalException, InterruptedException, ExecutionException, IOException {
+        int version = client.getVersion();
 
-    	// do the call
-    	final Health health = this.elasticsearchBulkIndexer.getClusterHealth();
-    	
-    	// assert
-    	Assert.assertEquals("gravitee_test", health.getClusterName());
+        Assert.assertTrue(version >= 2);
+    }
+
+    @Test
+    public void shouldGetHealth() throws TechnicalException, InterruptedException, ExecutionException, IOException {
+        Single<Health> health = client.getClusterHealth();
+
+        TestObserver<Health> observer = health.test();
+        observer.awaitTerminalEvent();
+
+        observer.assertNoErrors();
+        observer.assertComplete();
+        observer.assertValue(health1 -> "gravitee_test".equals(health1.getClusterName()));
     }
 }

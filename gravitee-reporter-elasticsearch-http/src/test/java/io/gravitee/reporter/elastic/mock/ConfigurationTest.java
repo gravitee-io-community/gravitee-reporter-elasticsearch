@@ -44,7 +44,8 @@ public class ConfigurationTest {
     }
 
     @Bean
-    public ElasticConfiguration elasticConfiguration(ElasticConfiguration elasticConfiguration) {
+    public ElasticConfiguration configuration() {
+        ElasticConfiguration elasticConfiguration = new ElasticConfiguration();
         elasticConfiguration.setEndpoints(Collections.singletonList(new Endpoint("http://localhost:" + elasticsearchNode().getHttpPort())));
         elasticConfiguration.setIngestPlugins(Arrays.asList("geoip"));
         return elasticConfiguration;

@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.reporter.elastic.engine;
-
+package io.gravitee.reporter.elastic;
 
 import io.gravitee.common.http.HttpMethod;
 import io.gravitee.common.http.HttpStatusCode;
+import io.gravitee.reporter.api.Reporter;
 import io.gravitee.reporter.api.common.Request;
 import io.gravitee.reporter.api.common.Response;
 import io.gravitee.reporter.api.health.EndpointStatus;
@@ -33,6 +33,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -40,28 +43,36 @@ import java.time.Instant;
 import java.util.Date;
 
 /**
- * Test the component that calls ES
- *
- * @author Guillaume Waignier
- * @author Sebastien Devaux
- *
+ * @author David BRASSELY (david.brassely at graviteesource.com)
+ * @author GraviteeSource Team
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {ConfigurationTest.class})
-public class ReporterEngineTest {
+@ContextConfiguration(classes = { ElasticsearchReporterTest.TestConfig.class })
+public class ElasticsearchReporterTest {
 
     @Autowired
-    private ReportEngine reportEngine;
+    private Reporter reporter;
+
+    @Configuration
+    @Import(ConfigurationTest.class) // the actual configuration
+    public static class TestConfig
+    {
+        @Bean
+        public ElasticsearchReporter reporter()
+        {
+            return new ElasticsearchReporter();
+        }
+    }
 
     @Before
     public void setUp() throws Exception {
-        this.reportEngine.start();
+        this.reporter.start();
     }
 
     @After
-    public void tearsDown() throws InterruptedException {
+    public void tearsDown() throws Exception {
         Thread.sleep(1000);
-        this.reportEngine.stop();
+        this.reporter.stop();
     }
 
     @Test
@@ -91,9 +102,9 @@ public class ReporterEngineTest {
         requestMetrics.setApi("api");
 
         // bulk of three line
-        this.reportEngine.report(requestMetrics);
-        this.reportEngine.report(requestMetrics);
-        this.reportEngine.report(requestMetrics);
+        reporter.report(requestMetrics);
+        reporter.report(requestMetrics);
+        reporter.report(requestMetrics);
 
         //TODO: do the assert
     }
@@ -134,7 +145,7 @@ public class ReporterEngineTest {
         endpointHealthStatus.setState(3);
         endpointHealthStatus.setResponseTime(175);
 
-        this.reportEngine.report(endpointHealthStatus);
+        reporter.report(endpointHealthStatus);
     }
 
     @Test
@@ -197,12 +208,12 @@ public class ReporterEngineTest {
                 .process(processInfo)
                 .build();
 
-        this.reportEngine.report(monitor);
+        reporter.report(monitor);
     }
 
     @Test
     public void reportTest() {
-        this.reportEngine.report(this.mockRequestMetrics());
+        reporter.report(mockRequestMetrics());
     }
 
     private Metrics mockRequestMetrics() {

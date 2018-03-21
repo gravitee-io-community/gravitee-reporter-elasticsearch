@@ -25,11 +25,16 @@ import org.elasticsearch.transport.Netty4Plugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.FileSystemUtils;
+import org.unitils.util.FileUtils;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
@@ -79,10 +84,14 @@ public class ElasticsearchNode {
 				.put("node.name", "test")
 				.put("http.port", httpPort)
 				.put("http.type", "netty4")
-				.put("transport.type", "local")
-				.put("path.data","./target/data")
-				.put("path.home","./target/data")
+				//.put("transport.type", "local")
+				.put("path.data","target/data")
+				.put("path.home","target/data")
 				.build();
+
+		File dataDir = Paths.get("target/data").toFile();
+		System.out.println(dataDir.getAbsolutePath());
+		FileSystemUtils.deleteRecursively(Paths.get("target/data").toFile());
 
 		this.node = new PluginConfigurableNode(
 				settings,
@@ -104,6 +113,8 @@ public class ElasticsearchNode {
 		this.node.client().admin().indices().delete(new DeleteIndexRequest("_all")).actionGet();
 
 		this.node.close();
+
+		FileSystemUtils.deleteRecursively(Paths.get("target/data").toFile());
 	}
 
 	private int generateFreePort() {
