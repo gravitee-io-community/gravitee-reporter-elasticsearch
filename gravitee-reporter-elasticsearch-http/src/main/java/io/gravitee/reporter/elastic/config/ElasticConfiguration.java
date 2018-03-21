@@ -49,7 +49,7 @@ public class ElasticConfiguration {
 	/**
 	 * Request actions max by bulk 
 	 */
-	@Value("${reporters.elasticsearch.bulk.actions:500}")
+	@Value("${reporters.elasticsearch.bulk.actions:50}")
 	private Integer bulkActions;
 	
 	/**
@@ -110,6 +110,18 @@ public class ElasticConfiguration {
 
 	public Integer getBulkActions() {
 		return bulkActions;
+	}
+
+	public void setIndexName(String indexName) {
+		this.indexName = indexName;
+	}
+
+	public void setBulkActions(Integer bulkActions) {
+		this.bulkActions = bulkActions;
+	}
+
+	public void setFlushInterval(Long flushInterval) {
+		this.flushInterval = flushInterval;
 	}
 
 	public Long getFlushInterval() {

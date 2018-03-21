@@ -1,4 +1,4 @@
-{ "index" : { "_index" : "${index}", "_type" : "${documentType}" } }
+{ "index" : { "_index" : "${index}" } }
 <@compress single_line=true>
 {
   "os":{

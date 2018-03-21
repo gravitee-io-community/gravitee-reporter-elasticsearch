@@ -70,7 +70,7 @@ public class ElasticsearchNode {
 	@PostConstruct
 	private void init() throws Exception {
 		this.start();
-		Thread.sleep(2000);
+	//	Thread.sleep(2000);
 	}
 	
 	/**
@@ -85,13 +85,9 @@ public class ElasticsearchNode {
 				.put("http.port", httpPort)
 				.put("http.type", "netty4")
 				//.put("transport.type", "local")
-				.put("path.data","target/data")
-				.put("path.home","target/data")
+				.put("path.data","target/data_gravitee_" + httpPort)
+				.put("path.home","target/data_gravitee_" + httpPort)
 				.build();
-
-		File dataDir = Paths.get("target/data").toFile();
-		System.out.println(dataDir.getAbsolutePath());
-		FileSystemUtils.deleteRecursively(Paths.get("target/data").toFile());
 
 		this.node = new PluginConfigurableNode(
 				settings,
@@ -114,7 +110,8 @@ public class ElasticsearchNode {
 
 		this.node.close();
 
-		FileSystemUtils.deleteRecursively(Paths.get("target/data").toFile());
+		File dataDir = Paths.get(node.settings().get("path.data")).toFile();
+		FileSystemUtils.deleteRecursively(dataDir);
 	}
 
 	private int generateFreePort() {

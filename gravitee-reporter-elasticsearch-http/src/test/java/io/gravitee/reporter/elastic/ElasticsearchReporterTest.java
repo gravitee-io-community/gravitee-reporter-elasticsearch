@@ -17,7 +17,6 @@ package io.gravitee.reporter.elastic;
 
 import io.gravitee.common.http.HttpMethod;
 import io.gravitee.common.http.HttpStatusCode;
-import io.gravitee.reporter.api.Reporter;
 import io.gravitee.reporter.api.common.Request;
 import io.gravitee.reporter.api.common.Response;
 import io.gravitee.reporter.api.health.EndpointStatus;
@@ -28,6 +27,10 @@ import io.gravitee.reporter.api.monitor.Monitor;
 import io.gravitee.reporter.api.monitor.OsInfo;
 import io.gravitee.reporter.api.monitor.ProcessInfo;
 import io.gravitee.reporter.elastic.mock.ConfigurationTest;
+import io.reactivex.Single;
+import io.reactivex.observers.TestObserver;
+import io.reactivex.plugins.RxJavaPlugins;
+import io.reactivex.schedulers.TestScheduler;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,6 +44,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
@@ -51,7 +55,9 @@ import java.util.Date;
 public class ElasticsearchReporterTest {
 
     @Autowired
-    private Reporter reporter;
+    private ElasticsearchReporter reporter;
+
+    private TestScheduler testScheduler;
 
     @Configuration
     @Import(ConfigurationTest.class) // the actual configuration
@@ -66,17 +72,22 @@ public class ElasticsearchReporterTest {
 
     @Before
     public void setUp() throws Exception {
+        testScheduler = new TestScheduler();
+        RxJavaPlugins.setComputationSchedulerHandler(ignore -> testScheduler);
+
         this.reporter.start();
     }
 
     @After
     public void tearsDown() throws Exception {
-        Thread.sleep(1000);
         this.reporter.stop();
+
+        // reset it
+        RxJavaPlugins.setComputationSchedulerHandler(null);
     }
 
     @Test
-    public void shouldReportMetrics() {
+    public void shouldReportMetrics() throws InterruptedException {
         final Metrics requestMetrics = Metrics.on(Instant.now().toEpochMilli()).build();
         requestMetrics.setTransactionId("transactionId");
         requestMetrics.setTenant("tenant");
@@ -102,11 +113,20 @@ public class ElasticsearchReporterTest {
         requestMetrics.setApi("api");
 
         // bulk of three line
-        reporter.report(requestMetrics);
-        reporter.report(requestMetrics);
-        reporter.report(requestMetrics);
+        TestObserver metrics1 = reporter.rxReport(requestMetrics).test();
+        TestObserver metrics2 = reporter.rxReport(requestMetrics).test();
+        TestObserver metrics3 = reporter.rxReport(requestMetrics).test();
 
-        //TODO: do the assert
+        // advance time manually
+        testScheduler.advanceTimeBy(5, TimeUnit.SECONDS);
+
+        metrics1.awaitTerminalEvent();
+        metrics2.awaitTerminalEvent();
+        metrics3.awaitTerminalEvent();
+
+        metrics1.assertNoErrors();
+        metrics2.assertNoErrors();
+        metrics3.assertNoErrors();
     }
 
     @Test
@@ -145,7 +165,13 @@ public class ElasticsearchReporterTest {
         endpointHealthStatus.setState(3);
         endpointHealthStatus.setResponseTime(175);
 
-        reporter.report(endpointHealthStatus);
+        TestObserver metrics1 = reporter.rxReport(endpointHealthStatus).test();
+
+        // advance time manually
+        testScheduler.advanceTimeBy(5, TimeUnit.SECONDS);
+
+        metrics1.awaitTerminalEvent();
+        metrics1.assertNoErrors();
     }
 
     @Test
@@ -208,12 +234,24 @@ public class ElasticsearchReporterTest {
                 .process(processInfo)
                 .build();
 
-        reporter.report(monitor);
+        TestObserver metrics1 = reporter.rxReport(monitor).test();
+
+        // advance time manually
+        testScheduler.advanceTimeBy(5, TimeUnit.SECONDS);
+
+        metrics1.awaitTerminalEvent();
+        metrics1.assertNoErrors();
     }
 
     @Test
     public void reportTest() {
-        reporter.report(mockRequestMetrics());
+        TestObserver metrics1 = reporter.rxReport(mockRequestMetrics()).test();
+
+        // advance time manually
+        testScheduler.advanceTimeBy(5, TimeUnit.SECONDS);
+
+        metrics1.awaitTerminalEvent();
+        metrics1.assertNoErrors();
     }
 
     private Metrics mockRequestMetrics() {

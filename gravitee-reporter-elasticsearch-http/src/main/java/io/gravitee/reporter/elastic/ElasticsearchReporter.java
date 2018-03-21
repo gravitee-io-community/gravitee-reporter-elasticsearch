@@ -24,12 +24,11 @@ import io.gravitee.reporter.elastic.mapping.IndexPreparer;
 import io.gravitee.reporter.elastic.spring.context.Elastic2xBeanRegistrer;
 import io.gravitee.reporter.elastic.spring.context.Elastic5xBeanRegistrer;
 import io.gravitee.reporter.elastic.spring.context.Elastic6xBeanRegistrer;
+import io.reactivex.Single;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.context.annotation.CommonAnnotationBeanPostProcessor;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
@@ -57,8 +56,6 @@ public class ElasticsearchReporter extends AbstractService implements Reporter {
 		boolean registered = true;
 
 		DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) applicationContext.getAutowireCapableBeanFactory();
-		//beanFactory.addBeanPostProcessor(new AutowiredAnnotationBeanPostProcessor());
-		//beanFactory.addBeanPostProcessor(new CommonAnnotationBeanPostProcessor());
 
 		switch (version) {
 			case 2:
@@ -89,11 +86,13 @@ public class ElasticsearchReporter extends AbstractService implements Reporter {
 
 	@Override
 	public void report(Reportable reportable) {
-		if (indexer != null) {
-			indexer
-					.index(reportable)
-					.doOnError(throwable -> logger.error("An error occurs while indexing data into Elasticsearch"));
-		}
+		rxReport(reportable);
+	}
+
+	public Single rxReport(Reportable reportable) {
+		return indexer
+				.index(reportable)
+				.doOnError(throwable -> logger.error("An error occurs while indexing data into Elasticsearch"));
 	}
 
 	@Override
