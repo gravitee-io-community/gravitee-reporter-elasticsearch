@@ -174,7 +174,6 @@ public class ElasticBulkProcessorFactory extends AbstractFactoryBean<BulkProcess
                     .startObject("plan").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).endObject()
                     .startObject("api-key").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                     .startObject("uri").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
-                    .startObject("path").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                     .startObject("endpoint").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).endObject()
                     .startObject("local-address").field(FIELD_TYPE, FIELD_TYPE_KEYWORD).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
                     .startObject("remote-address").field(FIELD_TYPE, FIELD_TYPE_IP).field(FIELD_INDEX, FIELD_INDEX_NOT_ANALYZED).endObject()
