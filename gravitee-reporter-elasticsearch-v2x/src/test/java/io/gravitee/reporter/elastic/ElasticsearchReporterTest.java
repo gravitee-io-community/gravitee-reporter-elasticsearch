@@ -59,7 +59,7 @@ public class ElasticsearchReporterTest {
 			Metrics metrics = Mockito.mock(Metrics.class);
 
 			Mockito.when(metrics.getHttpMethod()).thenReturn(HttpMethod.GET);
-			Mockito.when(metrics.getPath()).thenReturn("/customers/");
+			Mockito.when(metrics.getUri()).thenReturn("/customers/");
 			Mockito.when(metrics.getStatus()).thenReturn(200);
 
 			reporter.report(metrics);
