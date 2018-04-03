@@ -79,6 +79,14 @@ public class PipelineConfigurationTest {
 
                 .startObject()
                 .startObject("set")
+                .field("field", "geoip.country_iso_code")
+                .field("value", "Unknown")
+                .field("override", false)
+                .endObject()
+                .endObject()
+
+                .startObject()
+                .startObject("set")
                 .field("field", "geoip.continent_name")
                 .field("value", "Unknown")
                 .field("override", false)
