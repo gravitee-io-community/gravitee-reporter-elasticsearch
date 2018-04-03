@@ -42,6 +42,7 @@ public class PipelineConfiguration {
                 return builder.append(
                         "{\"geoip\":{\"field\":\"remote-address\"}}," +
                         "{\"set\": {\"field\": \"geoip.city_name\",\"value\": \"Unknown\",\"override\": false}},"+
+                                "{\"set\": {\"field\": \"geoip.country_iso_code\",\"value\": \"Unknown\",\"override\": false}}," +
                                 "{\"set\": {\"field\": \"geoip.continent_name\",\"value\": \"Unknown\",\"override\": false}}," +
                                 "{\"set\": {\"field\": \"geoip.region_name\",\"value\": \"Unknown\",\"override\": false}}"
                 );

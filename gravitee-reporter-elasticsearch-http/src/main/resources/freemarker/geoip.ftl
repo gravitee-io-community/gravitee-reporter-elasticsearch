@@ -17,7 +17,13 @@
       "value": "Unknown",
       "override": false
    }
-
+},
+{
+  "set": {
+      "field": "geoip.country_iso_code",
+      "value": "Unknown",
+      "override": false
+   }
 },
 {
   "set": {
